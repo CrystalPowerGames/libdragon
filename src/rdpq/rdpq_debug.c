@@ -375,12 +375,19 @@ void rdpq_debug_start(void)
 
     assertf(__rdpq_inited, "rdpq_init() must be called before rdpq_debug_start()");
     rspq_write(RDPQ_OVL_ID, RDPQ_CMD_SET_DEBUG_MODE, 1);
+
+    debugf("\n**************************************************\nRDPQ debug engine started (slowdowns are expected)\n**************************************************\n\n");
 }
 
 void rdpq_debug_log(bool log)
 {
-    assertf(rdpq_trace, "rdpq trace engine not started");
-    rdpq_passthrough_write((RDPQ_CMD_DEBUG, RDPQ_CMD_DEBUG_SHOWLOG, log ? 1 : 0));
+    static bool warning = false;
+    if (log && !rdpq_trace && !warning) {
+        debugf("WARNING: rdpq_debug_log(true) ignored because trace engine was not started\n");
+        warning = true;
+    }
+    if (rdpq_trace)
+        rdpq_passthrough_write((RDPQ_CMD_DEBUG, RDPQ_CMD_DEBUG_SHOWLOG, log ? 1 : 0));
 }
 
 void rdpq_debug_log_msg(const char *msg)
@@ -957,19 +964,56 @@ static void lazy_validate_rendertarget(void) {
     }
 }
 
-/** @brief True if the current CC uses the TEX1 slot aka the second texture */
-static bool cc_use_tex1(void) {
+/** @brief Non-zero if the current CC uses the TEX0 slot aka the first texture in 1cycle mode */
+static int cc_1cyc_use_tex0(void) {
     struct cc_cycle_s *cc = rdp.cc.cyc;
-    if (rdp.som.cycle_type != 1)    // TEX1 is used only in 2-cycle mode
-        return false;
+
+    int ret = 0;
+    // Cycle1: reference to TEX0/TEX0_ALPHA slot
+    if (cc[1].rgb.suba == 1 || cc[1].rgb.subb == 1 || cc[1].rgb.mul == 1 || cc[1].rgb.mul == 8 || cc[1].rgb.add == 1)
+        ret |= 1;
+    if (cc[1].alpha.suba == 1 || cc[1].alpha.subb == 1 || cc[1].alpha.mul == 1 || cc[1].alpha.add == 1)
+        ret |= 1;
+    return ret;
+}
+
+/** @brief Non-zero if the current CC uses the TEX0 slot aka the first texture, in 2cycle mode */
+static int cc_2cyc_use_tex0(void) {
+    struct cc_cycle_s *cc = rdp.cc.cyc;
+
+    int ret = 0;
+    // Cycle0: reference to TEX0/TEX0_ALPHA slot
+    if (cc[0].rgb.suba == 1 || cc[0].rgb.subb == 1 || cc[0].rgb.mul == 1 || cc[0].rgb.mul == 8 || cc[0].rgb.add == 1)
+        ret |= 1;
+    if (cc[0].alpha.suba == 1 || cc[0].alpha.subb == 1 || cc[0].alpha.mul == 1 || cc[0].alpha.add == 1)
+        ret |= 1;
+    // Cycle1: reference to TEX1/TEX1_ALPHA slot (which actually points to TEX0)
+    if (cc[1].rgb.suba == 2 || cc[1].rgb.subb == 2 || cc[1].rgb.mul == 2 || cc[1].rgb.mul == 9 || cc[1].rgb.add == 2)
+        ret |= 2;
+    if (cc[1].alpha.suba == 2 || cc[1].alpha.subb == 2 || cc[1].alpha.mul == 2 || cc[1].alpha.add == 2)
+        ret |= 2;
+    return ret;
+}
+
+/** @brief Non-zoer if the current CC uses the TEX1 slot aka the second texture, in 2cycle mode */
+static int cc_2cyc_use_tex1(void) {
+    struct cc_cycle_s *cc = rdp.cc.cyc;
     if ((rdp.som.tf_mode & 3) == 1) // TEX1 is the color-conversion of TEX0, so TEX1 is not used
         return false;
-    return 
-        // Cycle0: reference to TEX1/TEX1_ALPHA slot
-        (cc[0].rgb.suba == 2 || cc[0].rgb.subb == 2 || cc[0].rgb.mul == 2 || cc[0].rgb.mul == 9 || cc[0].rgb.add == 2) || 
-        // Cycle1: reference to TEX0/TEX0_ALPHA slot (which actually points to TEX1)
-        (cc[1].rgb.suba == 1 || cc[1].rgb.subb == 1 || cc[1].rgb.mul == 1 || cc[0].rgb.mul == 8 || cc[1].rgb.add == 1);
+    int ret = 0;
+    // Cycle0: reference to TEX1/TEX1_ALPHA slot
+    if (cc[0].rgb.suba == 2 || cc[0].rgb.subb == 2 || cc[0].rgb.mul == 2 || cc[0].rgb.mul == 9 || cc[0].rgb.add == 2)
+        ret |= 1;
+    if (cc[0].alpha.suba == 2 || cc[0].alpha.subb == 2 || cc[0].alpha.mul == 2 || cc[0].alpha.add == 2)
+        ret |= 1;
+    // Cycle1: reference to TEX0/TEX0_ALPHA slot (which actually points to TEX1)
+    if (cc[1].rgb.suba == 1 || cc[1].rgb.subb == 1 || cc[1].rgb.mul == 1 || cc[1].rgb.mul == 8 || cc[1].rgb.add == 1)
+        ret |= 2;
+    if (cc[1].alpha.suba == 1 || cc[1].alpha.subb == 1 || cc[1].alpha.mul == 1 || cc[1].alpha.add == 1)
+        ret |= 2;
+    return ret;
 }
+
 
 /** 
  * @brief Perform lazy evaluation of SOM and CC changes (on draw command).
@@ -1081,10 +1125,12 @@ static void lazy_validate_rendermode(void) {
         VALIDATE_ERR_CC(ccs[1].rgb.mul != 9,
             "in 2cycle mode, the color combiner cannot access the TEX1_ALPHA slot in the second cycle (but TEX0_ALPHA contains the second texture)");
         if (rdp.som.alphacmp.enable && !rdp.som.alphacmp.noise) {
-            bool cc1_passthrough = (ccs[1].alpha.mul == 7 && ccs[1].alpha.add == 0);  // (any-any)*0+combined
+            bool cc1_passthrough = (ccs[1].alpha.mul == 7 && ccs[1].alpha.add == 0);                // (any-any)*0+combined
+            cc1_passthrough |= (ccs[1].alpha.suba == ccs[1].alpha.subb && ccs[1].alpha.add == 0);   // (same-same)*any+combine
+            cc1_passthrough |= memcmp(&ccs[1], &ccs[0], sizeof(ccs[0])) == 0;                       // same as cycle0
             VALIDATE_ERR_CC(cc1_passthrough,
                 "in 2cycle mode, alpha compare is broken if the second alpha combiner cycle is not a passthrough because of a hardware bug");
-            VALIDATE_WARN_CC(!cc1_passthrough,
+            VALIDATE_ERR_SOM(!cc1_passthrough,
                 "in 2cycle mode, alpha compare is often shifted by one pixel because of a hardware bug");
         }
     }
@@ -1217,11 +1263,11 @@ static bool check_loading_crash(int hpixels) {
  * @brief Perform validation of a tile descriptor being used as part of a drawing command.
  * 
  * @param tidx      tile ID
- * @param cycle     Number of the cycle in which the the tile is being used (0 or 1)
+ * @param cycles    Bitfield of cycles in which the tile is accessed
  * @param texcoords Array of texture coordinates (S,T) used by the drawing command.
  * @param ncoords   Number of vertices in the array (the actual array element count will be double this number)
  */
-static void validate_use_tile(int tidx, int cycle, float *texcoords, int ncoords) {
+static void validate_use_tile_internal(int tidx, int cycles, float *texcoords, int ncoords) {
     struct tile_s *tile = &rdp.tile[tidx];
     rdp.busy.tile[tidx] = true;
     bool use_outside = false;
@@ -1244,8 +1290,10 @@ static void validate_use_tile(int tidx, int cycle, float *texcoords, int ncoords
             // YUV render mode mistakes in 1-cyc/2-cyc, that is when YUV conversion can be done.
             // In copy mode, YUV textures are copied as-is
             if (tile->fmt == 1) {
-                VALIDATE_ERR_SOM(!(rdp.som.tf_mode & (4>>cycle)),
-                    "tile %d is YUV but texture filter in cycle %d does not activate YUV color conversion", tidx, cycle);
+                if (cycles & 1) VALIDATE_ERR_SOM(!(rdp.som.tf_mode & (4>>0)),
+                        "tile %d is YUV but texture filter in cycle %d does not activate YUV color conversion", tidx, 0);
+                if (cycles & 2) VALIDATE_ERR_SOM(!(rdp.som.tf_mode & (4>>1)),
+                        "tile %d is YUV but texture filter in cycle %d does not activate YUV color conversion", tidx, 1);
                 if (rdp.som.sample_type > 1) {
                     static const char* texinterp[] = { "point", "point", "bilinear", "median" };
                     VALIDATE_ERR_SOM(rdp.som.tf_mode == 6 && rdp.som.cycle_type == 1,
@@ -1254,8 +1302,10 @@ static void validate_use_tile(int tidx, int cycle, float *texcoords, int ncoords
                         "tile %d is YUV and %s filtering is active: 2-cycle mode must be configured", tidx, texinterp[rdp.som.sample_type]);
                 }
             } else {
-                VALIDATE_ERR_SOM((rdp.som.tf_mode & (4>>cycle)),
-                    "tile %d is RGB-based, but cycle %d is configured for YUV color conversion; try setting SOM_TF%d_RGB", tidx, cycle, cycle);
+                if (cycles & 1) VALIDATE_ERR_SOM((rdp.som.tf_mode & (4>>0)),
+                    "tile %d is RGB-based, but cycle %d is configured for YUV color conversion; try setting SOM_TF%d_RGB", tidx, 0, 0);
+                if (cycles & 2) VALIDATE_ERR_SOM((rdp.som.tf_mode & (4>>1)),
+                    "tile %d is RGB-based, but cycle %d is configured for YUV color conversion; try setting SOM_TF%d_RGB", tidx, 1, 1);
             }
             // Validate clamp/mirror/wrap modes
             if (use_outside) {
@@ -1299,11 +1349,36 @@ static void validate_use_tile(int tidx, int cycle, float *texcoords, int ncoords
         if (tile->size == 1) mark_busy_tmem(0x800, 0x800);           // CI8
         break;
     }
+}
 
-    // If this is the tile for cycle0 and the combiner uses TEX1,
-    // then also tile+1 is used. Process that as well.
-    if (cycle == 0 && cc_use_tex1())
-        validate_use_tile((tidx+1) & 7, 1, texcoords, ncoords);
+/**
+ * @brief Perform validation of a tile descriptor being used as part of a drawing command.
+ * 
+ * @param tidx      tile ID
+ * @param texcoords Array of texture coordinates (S,T) used by the drawing command.
+ * @param ncoords   Number of vertices in the array (the actual array element count will be double this number)
+ */
+static void validate_use_tile(int tidx, float *texcoords, int ncoords) {
+    if (rdp.som.cycle_type == 3) return; // FILL mode does not use tiles
+    if (rdp.som.cycle_type == 2) {
+        // In COPY mode, the tile is used only in the first cycle
+        validate_use_tile_internal(tidx, (1<<0), texcoords, ncoords);
+        return;
+    }
+
+    // Tile indices. FIXME: this does not handle LODs and detail/sharpen
+    int tidx0 = tidx;
+    int tidx1 = (tidx+1) & 7;
+
+    if (rdp.som.cycle_type == 1) {
+        int cyc_tex0 = cc_2cyc_use_tex0();
+        int cyc_tex1 = cc_2cyc_use_tex1();
+        if (cyc_tex0) validate_use_tile_internal(tidx0, cyc_tex0, texcoords, ncoords);
+        if (cyc_tex1) validate_use_tile_internal(tidx1, cyc_tex1, texcoords, ncoords);
+    } else {
+        int cyc_tex0 = cc_1cyc_use_tex0();
+        if (cyc_tex0) validate_use_tile_internal(tidx0, cyc_tex0, texcoords, ncoords);
+    }
 }
 
 void rdpq_validate(uint64_t *buf, uint32_t flags, int *r_errs, int *r_warns)
@@ -1476,7 +1551,7 @@ void rdpq_validate(uint64_t *buf, uint32_t flags, int *r_errs, int *r_warns)
         float sw = SBITS(buf[1], 16, 31)*FX(10), tw = SBITS(buf[1],  0, 15)*FX(10);
         if (rdp.som.cycle_type == 2) w += 1;    // copy mode has inclusive horizontal bounds
         if (rdp.som.cycle_type == 2) sw /= 4;   // copy mode has 4x horizontal scale
-        validate_use_tile(BITS(buf[0], 24, 26), 0, (float[]){s0, t0, s0+sw*(w-1), t0+tw*(h-1)}, 2);
+        validate_use_tile(BITS(buf[0], 24, 26), (float[]){s0, t0, s0+sw*(w-1), t0+tw*(h-1)}, 2);
         if (rdp.som.cycle_type == 2) {
             uint16_t dsdx = BITS(buf[1], 16, 31);
             if (dsdx != 4<<10) {
@@ -1513,7 +1588,7 @@ void rdpq_validate(uint64_t *buf, uint32_t flags, int *r_errs, int *r_warns)
         lazy_validate_rendertarget();
         lazy_validate_rendermode();
         validate_draw_cmd(cmd & 4, cmd & 2, cmd & 1, cmd & 2);
-        if (cmd & 2) validate_use_tile(BITS(buf[0], 48, 50), 0, NULL, 0);  // TODO: pass texture coordinates here
+        if (cmd & 2) validate_use_tile(BITS(buf[0], 48, 50), NULL, 0);  // TODO: pass texture coordinates here
         if (BITS(buf[0], 51, 53))
             VALIDATE_WARN_SOM(rdp.som.tex.lod, "triangle with %d mipmaps specified, but mipmapping is disabled",
                 BITS(buf[0], 51, 53)+1);

@@ -13,6 +13,7 @@
 #include "rdpq_tex.h"
 #include "rdpq_tex_internal.h"
 #include "utils.h"
+#include "fmath.h"
 #include <math.h>
 
 /** @brief Non-zero if we are doing a multi-texture upload */
@@ -52,6 +53,7 @@ static void texload_recalc_tileparms(tex_loader_t *tload)
     int ymask = 0;
 
     rdpq_tileparms_t *res = &tload->tileparms;
+    res->palette = parms->palette;
 
     if(parms->s.repeats > 1){
         xmask = integer_to_pow2(width);
@@ -115,7 +117,7 @@ static int texload_set_rect(tex_loader_t *tload, int s0, int t0, int s1, int t1)
     // additional logic here to select the proper pixels
     assertf(s1 <= tload->tex->width && t1 <= tload->tex->height, "rdpq tex loader does not support clamping/mirroring");
 
-    tex_format_t fmt = surface_get_format(tload->tex);
+    tex_format_t fmt = tload->fmt;
     if (TEX_FORMAT_BITDEPTH(fmt) == 4) {
         s0 &= ~1; s1 = (s1+1) & ~1;
     }
@@ -203,7 +205,7 @@ static void texload_block_4bpp(tex_loader_t *tload, int s0, int t0, int s1, int 
         assertf(ROUND_UP(tload->tex->width, 2) % 4 == 0, "Internal Error: invalid width for LOAD_BLOCK (%d)", tload->tex->width);
         rdpq_set_texture_image_raw(surface_get_placeholder_index(tload->tex), PhysicalAddr(tload->tex->buffer), FMT_RGBA16, (tload->tex->width+1)/4, tload->tex->height);
         rdpq_set_tile(tile_internal, FMT_RGBA16, tload->tmem_addr, 0, NULL);
-        rdpq_set_tile(tload->tile, surface_get_format(tload->tex), tload->tmem_addr, tload->rect.tmem_pitch, &(tload->tileparms));
+        rdpq_set_tile(tload->tile, tload->fmt, tload->tmem_addr, tload->rect.tmem_pitch, &(tload->tileparms));
         tload->load_mode = TEX_LOAD_BLOCK;
     }
 
@@ -220,7 +222,7 @@ static void texload_block_4bpp(tex_loader_t *tload, int s0, int t0, int s1, int 
 static void texload_block_8bpp(tex_loader_t *tload, int s0, int t0, int s1, int t1)
 {
     rdpq_tile_t tile_internal = (tload->tile + 1) & 7;
-    tex_format_t fmt = surface_get_format(tload->tex);
+    tex_format_t fmt = tload->fmt;
     if (tload->load_mode != TEX_LOAD_BLOCK) {
         // Use LOAD_BLOCK if we are uploading a full texture. Notice the weirdness of LOAD_BLOCK:
         // * SET_TILE must be configured with tmem_pitch=0, as that is weirdly used as the number of
@@ -243,7 +245,7 @@ static void texload_block_8bpp(tex_loader_t *tload, int s0, int t0, int s1, int 
 static void texload_block(tex_loader_t *tload, int s0, int t0, int s1, int t1)
 {
     rdpq_tile_t tile_internal = (tload->tile + 1) & 7;
-    tex_format_t fmt = surface_get_format(tload->tex);
+    tex_format_t fmt = tload->fmt;
     if (tload->load_mode != TEX_LOAD_BLOCK) {
         // Use LOAD_BLOCK if we are uploading a full texture. Notice the weirdness of LOAD_BLOCK:
         // * SET_TILE must be configured with tmem_pitch=0, as that is weirdly used as the number of
@@ -269,7 +271,7 @@ static void texload_tile_4bpp(tex_loader_t *tload, int s0, int t0, int s1, int t
     if (tload->load_mode != TEX_LOAD_TILE) {
         rdpq_set_texture_image_raw(surface_get_placeholder_index(tload->tex), PhysicalAddr(tload->tex->buffer), FMT_I8, tload->tex->stride, tload->tex->height);
         rdpq_set_tile(tile_internal, FMT_I8, tload->tmem_addr, tload->rect.tmem_pitch, NULL);
-        rdpq_set_tile(tload->tile, surface_get_format(tload->tex), tload->tmem_addr, tload->rect.tmem_pitch, &(tload->tileparms));
+        rdpq_set_tile(tload->tile, tload->fmt, tload->tmem_addr, tload->rect.tmem_pitch, &(tload->tileparms));
         tload->load_mode = TEX_LOAD_TILE;
     }
 
@@ -284,7 +286,7 @@ static void texload_tile_4bpp(tex_loader_t *tload, int s0, int t0, int s1, int t
 
 static void texload_tile(tex_loader_t *tload, int s0, int t0, int s1, int t1)
 {
-    tex_format_t fmt = surface_get_format(tload->tex);
+    tex_format_t fmt = tload->fmt;
     if (tload->load_mode != TEX_LOAD_TILE) {
         rdpq_set_texture_image(tload->tex);
         rdpq_set_tile(tload->tile, fmt, tload->tmem_addr, tload->rect.tmem_pitch, &(tload->tileparms));
@@ -302,7 +304,7 @@ static void texload_tile(tex_loader_t *tload, int s0, int t0, int s1, int t1)
 
 static void texload_settile(tex_loader_t *tload, int s0, int t0, int s1, int t1)
 {
-    tex_format_t fmt = surface_get_format(tload->tex);
+    tex_format_t fmt = tload->fmt;
 
     rdpq_set_tile(tload->tile, fmt, tload->tmem_addr, tload->rect.tmem_pitch, &(tload->tileparms));
 
@@ -333,6 +335,7 @@ tex_loader_t tex_loader_init(rdpq_tile_t tile, const surface_t *tex) {
     bool is_8bpp = bpp == 8;
     return (tex_loader_t){
         .tex = tex,
+        .fmt = surface_get_format(tex),
         .tile = tile,
         .load_block = is_4bpp ? texload_block_4bpp : (is_8bpp ? texload_block_8bpp : texload_block),
         .load_tile = is_4bpp ? texload_tile_4bpp : texload_tile,
@@ -392,6 +395,11 @@ int rdpq_tex_upload_sub(rdpq_tile_t tile, const surface_t *tex, const rdpq_texpa
         #endif
     }
 
+    // We can't guarantee the surface pointer will be valid after this function return
+    // so clean it. Our code shouldn't reuse the surface anyway, but let's make sure
+    // it triggers a crash if it does.
+    last_tload.tex = NULL;
+
     return nbytes;
 }
 
@@ -403,7 +411,7 @@ int rdpq_tex_upload(rdpq_tile_t tile, const surface_t *tex, const rdpq_texparms_
 int rdpq_tex_reuse_sub(rdpq_tile_t tile, const rdpq_texparms_t *parms, int s0, int t0, int s1, int t1)
 {
     assertf(multi_upload.used, "Reusing existing texture needs to be done through multi-texture upload");
-    assertf(last_tload.tex, "Reusing existing texture is not possible without uploading at least one texture first");  
+    assertf(last_tload.fmt != FMT_NONE, "Reusing existing texture is not possible without uploading at least one texture first");
     assertf(parms == NULL || parms->tmem_addr == 0, "Do not specify a TMEM address while reusing an existing texture");
 
     // Check if just copying a tile descriptor is enough
@@ -422,10 +430,9 @@ int rdpq_tex_reuse_sub(rdpq_tile_t tile, const rdpq_texparms_t *parms, int s0, i
     assertf(s0 >= 0 && t0 >= 0 && s1 <= tload.rect.width && t1 <= tload.rect.height, "Sub coordinates (%i,%i)-(%i,%i) must be within bounds of the texture reused (%ix%i)", s0, t0, s1, t1,  tload.rect.width, tload.rect.height);
     assertf(t0 % 2 == 0, "t0=%i must be in multiples of 2 pixels", t0);
 
-    tex_format_t fmt = surface_get_format(tload.tex);
-    int tmem_offset = TEX_FORMAT_PIX2BYTES(fmt, s0);
+    int tmem_offset = TEX_FORMAT_PIX2BYTES(tload.fmt, s0);
 
-    assertf(tmem_offset % 8 == 0, "Due to 8-byte texture alignment, for %s format, s0=%i must be in multiples of %i pixels", tex_format_name(fmt), s0, TEX_FORMAT_BYTES2PIX(fmt, 8));
+    assertf(tmem_offset % 8 == 0, "Due to 8-byte texture alignment, for %s format, s0=%i must be in multiples of %i pixels", tex_format_name(tload.fmt), s0, TEX_FORMAT_BYTES2PIX(tload.fmt, 8));
     
     tmem_offset += tload.rect.tmem_pitch*t0;
     tload.tmem_addr = RDPQ_AUTOTMEM_REUSE(tmem_offset);
@@ -463,7 +470,7 @@ static void ltd_texloader(rdpq_tile_t tile, const surface_t *tex, int s0, int t0
     tex_loader_t tload = tex_loader_init(tile, tex);
 
     // Calculate the optimal height for a strip, based on strips of maximum length.
-    int tile_h = tex_loader_calc_max_height(&tload, tex->width);
+    int tile_h = tex_loader_calc_max_height(&tload, s1 - s0);
     
     // Go through the surface
     while (t0 < t1) 
@@ -490,24 +497,26 @@ static void tex_xblit_norotate_noscale(const surface_t *surf, float x0, float y0
     rdpq_tile_t tile = parms->tile;
     int src_width = parms->width ? parms->width : surf->width;
     int src_height = parms->height ? parms->height : surf->height;
-    int s0 = parms->s0;
-    int t0 = parms->t0;
-    int cx = parms->cx + s0;
-    int cy = parms->cy + t0;
+    int os0 = parms->s0;
+    int ot0 = parms->t0;
+    int os1 = os0 + src_width;
+    int ot1 = ot0 + src_height;
     bool flip_x = parms->flip_x;
     bool flip_y = parms->flip_y;
+    x0 -= os0 + parms->cx;
+    y0 -= ot0 + parms->cy;
 
     void draw_cb(rdpq_tile_t tile, int s0, int t0, int s1, int t1)
     {
         int ks0 = s0, kt0 = t0, ks1 = s1, kt1 = t1;
 
-        if (flip_x) { ks0 = src_width - s0 - 1;  ks1 = src_width - s1 - 1; }
-        if (flip_y) { kt0 = src_height - t0 - 1; kt1 = src_height - t1 - 1; }
+        if (flip_x) { ks0 = os1 - s0 + os0 - 1; ks1 = os1 - s1 + os0 - 1; }
+        if (flip_y) { kt0 = ot1 - t0 + ot0 - 1; kt1 = ot1 - t1 + ot0 - 1; }
 
-        rdpq_texture_rectangle(tile, x0 + ks0 - cx, y0 + kt0 - cy, x0 + ks1 - cx, y0 + kt1 - cy, s0, t0);
+        rdpq_texture_rectangle(tile, x0 + ks0, y0 + kt0, x0 + ks1, y0 + kt1, s0, t0);
     }
 
-    (*ltd)(tile, surf, s0, t0, s0 + src_width, t0 + src_height, draw_cb, parms->filtering);
+    (*ltd)(tile, surf, os0, ot0, os1, ot1, draw_cb, parms->filtering);
 }
 
 __attribute__((noinline))
@@ -516,14 +525,14 @@ static void tex_xblit_norotate(const surface_t *surf, float x0, float y0, const 
     rdpq_tile_t tile = parms->tile;
     int src_width = parms->width ? parms->width : surf->width;
     int src_height = parms->height ? parms->height : surf->height;
-    int s0 = parms->s0;
-    int t0 = parms->t0;
-    int cx = parms->cx + s0;
-    int cy = parms->cy + t0;
+    int os0 = parms->s0;
+    int ot0 = parms->t0;
+    int os1 = os0 + src_width;
+    int ot1 = ot0 + src_height;
+    int cx = parms->cx + os0;
+    int cy = parms->cy + ot0;
     float scalex = parms->scale_x == 0 ? 1.0f : parms->scale_x;
     float scaley = parms->scale_y == 0 ? 1.0f : parms->scale_y;
-    bool flip_x = (scalex < 0) ^ parms->flip_x;
-    bool flip_y = (scaley < 0) ^ parms->flip_y;
 
     float mtx[3][2] = {
         { scalex, 0 },
@@ -536,8 +545,8 @@ static void tex_xblit_norotate(const surface_t *surf, float x0, float y0, const 
     {
         int ks0 = s0, kt0 = t0, ks1 = s1, kt1 = t1;
 
-        if (flip_x) { ks0 = src_width - s0 - 1;  ks1 = src_width - s1 - 1;  }
-        if (flip_y) { kt0 = src_height - t0 - 1; kt1 = src_height - t1 - 1; }
+        if (parms->flip_x) { ks0 = os1 - s0 + os0 - 1; ks1 = os1 - s1 + os0 - 1;  }
+        if (parms->flip_y) { kt0 = ot1 - t0 + ot0 - 1; kt1 = ot1 - t1 + ot0 - 1; }
 
         float k0x = mtx[0][0] * ks0 + mtx[1][0] * kt0 + mtx[2][0];
         float k0y = mtx[0][1] * ks0 + mtx[1][1] * kt0 + mtx[2][1];
@@ -547,7 +556,7 @@ static void tex_xblit_norotate(const surface_t *surf, float x0, float y0, const 
         rdpq_texture_rectangle_scaled(tile, k0x, k0y, k2x, k2y, s0, t0, s1, t1);
     }
 
-    (*ltd)(tile, surf, s0, t0, s0 + src_width, t0 + src_height, draw_cb, parms->filtering);
+    (*ltd)(tile, surf, os0, ot0, os1, ot1, draw_cb, parms->filtering);
 }
 
 __attribute__((noinline))
@@ -556,17 +565,24 @@ static void tex_xblit(const surface_t *surf, float x0, float y0, const rdpq_blit
     rdpq_tile_t tile = parms->tile;
     int src_width = parms->width ? parms->width : surf->width;
     int src_height = parms->height ? parms->height : surf->height;
-    int s0 = parms->s0;
-    int t0 = parms->t0;
-    int cx = parms->cx + s0;
-    int cy = parms->cy + t0;
+    int os0 = parms->s0;
+    int ot0 = parms->t0;
+    int os1 = os0 + src_width;
+    int ot1 = ot0 + src_height;
+    int cx = parms->cx + os0;
+    int cy = parms->cy + ot0;
     int nx = parms->nx;
     int ny = parms->ny;
     float scalex = parms->scale_x == 0 ? 1.0f : parms->scale_x;
     float scaley = parms->scale_y == 0 ? 1.0f : parms->scale_y;
+    bool flip_x = parms->flip_x;
+    bool flip_y = parms->flip_y;
+
+    if (scalex < 0) { flip_x = !flip_x; scalex = -scalex; }
+    if (scaley < 0) { flip_y = !flip_y; scaley = -scaley; }
 
     float sin_theta, cos_theta; 
-    sincosf(parms->theta, &sin_theta, &cos_theta);
+    fm_sincosf(parms->theta, &sin_theta, &cos_theta);
 
     float mtx[3][2] = {
         { cos_theta * scalex, -sin_theta * scaley },
@@ -579,8 +595,8 @@ static void tex_xblit(const surface_t *surf, float x0, float y0, const rdpq_blit
     {
         int ks0 = s0, kt0 = t0, ks1 = s1, kt1 = t1;
 
-        if (parms->flip_x) { ks0 = src_width - ks0; ks1 = src_width - ks1; }
-        if (parms->flip_y) { kt0 = src_height - kt0; kt1 = src_height - kt1; }
+        if (flip_x) { ks0 = os1 - ks0 + os0; ks1 = os1 - ks1 + os0; }
+        if (flip_y) { kt0 = ot1 - kt0 + ot0; kt1 = ot1 - kt1 + ot0; }
 
         float k0x = mtx[0][0] * ks0 + mtx[1][0] * kt0 + mtx[2][0];
         float k0y = mtx[0][1] * ks0 + mtx[1][1] * kt0 + mtx[2][1];
@@ -602,8 +618,8 @@ static void tex_xblit(const surface_t *surf, float x0, float y0, const rdpq_blit
     void draw_cb_multi_rot(rdpq_tile_t tile, int s0, int t0, int s1, int t1)
     {
         int ks0 = s0, kt0 = t0, ks1 = s1, kt1 = t1;
-        if (parms->flip_x) { ks0 = src_width - ks0; ks1 = src_width - ks1; }
-        if (parms->flip_y) { kt0 = src_height - kt0; kt1 = src_height - kt1; }
+        if (flip_x) { ks0 = os1 - ks0 + os0; ks1 = os1 - ks1 + os0; }
+        if (flip_y) { kt0 = ot1 - kt0 + ot0; kt1 = ot1 - kt1 + ot0; }
 
         assert(s1-s0 == src_width);
 
@@ -641,9 +657,9 @@ static void tex_xblit(const surface_t *surf, float x0, float y0, const rdpq_blit
     }
 
     if (nx || ny) {
-        (*ltd)(tile, surf, s0, t0, s0 + src_width, t0 + src_height, draw_cb_multi_rot, parms->filtering);    
+        (*ltd)(tile, surf, os0, ot0, os1, ot1, draw_cb_multi_rot, parms->filtering);    
     } else {
-        (*ltd)(tile, surf, s0, t0, s0 + src_width, t0 + src_height, draw_cb, parms->filtering);
+        (*ltd)(tile, surf, os0, ot0, os1, ot1, draw_cb, parms->filtering);
     }
 }
 
@@ -688,6 +704,7 @@ void rdpq_tex_multi_begin(void)
         multi_upload.bytes = 0;
         multi_upload.limit = 4096;
         last_tload.tex = 0;
+        last_tload.fmt = FMT_NONE;
     }
 }
 

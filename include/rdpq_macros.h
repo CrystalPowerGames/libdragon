@@ -58,7 +58,8 @@ typedef uint32_t rdpq_blender_t;
 #define _RDPQ_COMB2A_RGB_SUBA_0         cast64(8)
 
 #define _RDPQ_COMB2B_RGB_SUBA_COMBINED  cast64(0)
-#define _RDPQ_COMB2B_RGB_SUBA_TEX1      cast64(1)  // TEX0 not available in 2nd cycle (pipelined)
+#define _RDPQ_COMB2B_RGB_SUBA_TEX1      cast64(1)
+#define _RDPQ_COMB2B_RGB_SUBA_TEX0_BUG  cast64(2) // TEX0 is buggy in 2nd cycle: it refers to *next* pixel in the scanline
 #define _RDPQ_COMB2B_RGB_SUBA_PRIM      cast64(3)
 #define _RDPQ_COMB2B_RGB_SUBA_SHADE     cast64(4)
 #define _RDPQ_COMB2B_RGB_SUBA_ENV       cast64(5)
@@ -88,7 +89,8 @@ typedef uint32_t rdpq_blender_t;
 #define _RDPQ_COMB2A_RGB_SUBB_0         cast64(8)
 
 #define _RDPQ_COMB2B_RGB_SUBB_COMBINED  cast64(0)
-#define _RDPQ_COMB2B_RGB_SUBB_TEX1      cast64(1)  // TEX0 not available in 2nd cycle (pipelined)
+#define _RDPQ_COMB2B_RGB_SUBB_TEX1      cast64(1)
+#define _RDPQ_COMB2B_RGB_SUBA_TEX0_BUG  cast64(2) // TEX0 is buggy in 2nd cycle: it refers to *next* pixel in the scanline
 #define _RDPQ_COMB2B_RGB_SUBB_PRIM      cast64(3)
 #define _RDPQ_COMB2B_RGB_SUBB_SHADE     cast64(4)
 #define _RDPQ_COMB2B_RGB_SUBB_ENV       cast64(5)
@@ -130,7 +132,8 @@ typedef uint32_t rdpq_blender_t;
 #define _RDPQ_COMB2A_RGB_MUL_0              cast64(16)
 
 #define _RDPQ_COMB2B_RGB_MUL_COMBINED       cast64(0)
-#define _RDPQ_COMB2B_RGB_MUL_TEX1           cast64(1)  // TEX0 not available in 2nd cycle (pipelined)
+#define _RDPQ_COMB2B_RGB_MUL_TEX1           cast64(1)
+#define _RDPQ_COMB2B_RGB_MUL_TEX0_BUG       cast64(2)  // TEX0 is buggy in 2nd cycle: it refers to *next* pixel in the scanline
 #define _RDPQ_COMB2B_RGB_MUL_PRIM           cast64(3)
 #define _RDPQ_COMB2B_RGB_MUL_SHADE          cast64(4)
 #define _RDPQ_COMB2B_RGB_MUL_ENV            cast64(5)
@@ -166,7 +169,8 @@ typedef uint32_t rdpq_blender_t;
 #define _RDPQ_COMB2A_RGB_ADD_0         cast64(7)
 
 #define _RDPQ_COMB2B_RGB_ADD_COMBINED  cast64(0)
-#define _RDPQ_COMB2B_RGB_ADD_TEX1      cast64(1)  // TEX0 not available in 2nd cycle (pipelined)
+#define _RDPQ_COMB2B_RGB_ADD_TEX1      cast64(1)
+#define _RDPQ_COMB2B_RGB_ADD_TEX0_BUG  cast64(2)  // TEX0 is buggy in 2nd cycle: it refers to *next* pixel in the scanline
 #define _RDPQ_COMB2B_RGB_ADD_PRIM      cast64(3)
 #define _RDPQ_COMB2B_RGB_ADD_SHADE     cast64(4)
 #define _RDPQ_COMB2B_RGB_ADD_ENV       cast64(5)
@@ -324,7 +328,11 @@ typedef uint32_t rdpq_blender_t;
  * This is the list of all possible slots. Not all slots are
  * available for the four variables (see the table below).
  *  
- *  * `TEX0`: texel of the texture being drawn.
+ *  * `TEX0`: texel of the first texture being drawn.
+ *  * `TEX1`: texel of the second texture being drawn.
+ *  * `TEX0_BUG`: due to a hardware bug, when using TEX0 in the second pass,
+ *    RDP will actually sample the next texel in the scanline. We call this
+ *    slot `TEX0_BUG` to make it clear that there is a potential issue.
  *  * `SHADE`: per-pixel interpolated color. This can be set on each
  *    vertex of a triangle, and is interpolated across each pixel. It
  *    cannot be used while drawing rectangles.
@@ -384,12 +392,6 @@ typedef uint32_t rdpq_blender_t;
  * 
  *        rdpq_mode_combiner(RDPQ1_COMBINER((TEX0, 0, SHADE, 0), (TEX0, 0, SHADE, 0)));
  *
- * Notice that this is just a way to obtain the formula above. Another possibility is:
- * 
- *        rdpq_mode_combiner(RDPQ1_COMBINER((1, 0, SHADE, TEX0), (1, 0, SHADE, TEX0)));
- * 
- * which will obtain exactly the same result.
- * 
  * A complete example drawing a textured rectangle with a fixed semi-transparency of 0.7:
  * 
  * @code{.c}
@@ -858,5 +860,32 @@ typedef uint32_t rdpq_blender_t;
  * @hideinitializer
  */
 #define RDPQ_BLENDER2(bl0, bl1) castbl(__rdpq_blend_2cyc_0 bl0 | __rdpq_blend_2cyc_1 bl1 | SOMX_BLEND_2PASS)
+
+/** 
+ * @brief The maximum Z value, which is the default reset value for the Z-Buffer.
+ * 
+ * This is equivalent to #ZBUF_VAL(1.0f)
+ */
+#define ZBUF_MAX        0xFFFC 
+
+#ifndef __ASSEMBLER__
+
+///@cond
+extern uint16_t __rdpq_zfp14(float f);
+///@endcond
+
+/** 
+ * @brief Create a packed Z-buffer value for a given Z value.
+ * 
+ * This macro can be used to convert a floating point Z value in range [0..1]
+ * to a packed Z value that can be written as-is in the Z-buffer, for instance
+ * via #rdpq_clear_z.
+ * 
+ * Notice that this macro sets Delta-Z to 0 in the packed Z value, since it is
+ * not possible to fully configure Delta-Z via #rdpq_clear_z anyway.
+ */
+#define ZBUF_VAL(f)     (__rdpq_zfp14(f) << 2)
+
+#endif
 
 #endif

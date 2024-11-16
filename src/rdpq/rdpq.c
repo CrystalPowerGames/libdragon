@@ -1012,6 +1012,14 @@ void rdpq_set_color_image(const surface_t *surface)
     }
     assertf((PhysicalAddr(surface->buffer) & 63) == 0,
         "buffer pointer is not aligned to 64 bytes, so it cannot be used as RDP color image");
+    if (rdpq_config & RDPQ_CFG_AUTOSCISSOR) {
+        // Max horizontal scissor value is 1023, and that allows for a 1023-pixel
+        // surface in standard mode, and 1024-pixel surface in copy/fill mode.
+        // Here, for simplicity, we just allow only up to 1023.
+        // Height is always exclusive, so the maximum height is always 1023.
+        assertf(surface->width <= 1023, "surface width is too large for auto-scissoring (max: 1023)");
+        assertf(surface->height <= 1023, "surface height is too large for auto-scissoring (max: 1023)");
+    }
     rdpq_set_color_image_raw(0, PhysicalAddr(surface->buffer), 
         surface_get_format(surface), surface->width, surface->height, surface->stride);
 }
@@ -1121,6 +1129,20 @@ void rdpq_sync_load(void)
 }
 
 /** @} */
+
+///@cond
+uint16_t __rdpq_zfp14(float f) {
+    uint32_t fx = f * 0x3FFFF;
+    if (!(fx & 0x20000)) return (0<<11) | ((fx >> 6) & 0x7FF);
+    if (!(fx & 0x10000)) return (1<<11) | ((fx >> 5) & 0x7FF);
+    if (!(fx & 0x08000)) return (2<<11) | ((fx >> 4) & 0x7FF);
+    if (!(fx & 0x04000)) return (3<<11) | ((fx >> 3) & 0x7FF);
+    if (!(fx & 0x02000)) return (4<<11) | ((fx >> 2) & 0x7FF);
+    if (!(fx & 0x01000)) return (5<<11) | ((fx >> 1) & 0x7FF);
+    if (!(fx & 0x00800)) return (6<<11) | ((fx >> 0) & 0x7FF);
+    if (true)            return (7<<11) | ((fx >> 0) & 0x7FF);
+}
+///@endcond
 
 /* Extern inline instantiations. */
 extern inline void rdpq_set_fill_color(color_t color);

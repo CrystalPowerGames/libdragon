@@ -42,7 +42,7 @@ typedef struct rdpq_texparms_s {
 
     struct {
         float   translate;    ///< Translation of the texture (in pixels)
-        int     scale_log;    ///< Power of 2 scale modifier of the texture (default: 0). Eg: -2 = make the texture 4 times smaller
+        int     scale_log;    ///< Power of 2 scale modifier of the texture (default: 0). Eg: -2 = make the texture 4 times smaller. Range is [-5..10]
 
         float   repeats;      ///< Number of repetitions before the texture clamps (default: 1). Use #REPEAT_INFINITE for infinite repetitions (wrapping)
         bool    mirror;       ///< Repetition mode (default: MIRROR_NONE). If true (MIRROR_REPEAT), the texture mirrors at each repetition 
@@ -61,6 +61,7 @@ enum tex_load_mode {
 
 typedef struct tex_loader_s {
     const surface_t *tex;
+    tex_format_t fmt;
     rdpq_tile_t tile;
     const rdpq_texparms_t *texparms;
     rdpq_tileparms_t tileparms;
