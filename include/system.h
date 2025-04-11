@@ -264,6 +264,7 @@ typedef struct
 } stdio_t;
 
 /**
+<<<<<<< HEAD
  * @brief Real-time clock hook structure
  *
  * This structure provides optional callback hooks for code wishing to
@@ -304,6 +305,26 @@ typedef struct
  * @param[in] filesystem
  *            Pointer to structure containing filesystem callbacks
  *
+=======
+ * @brief Register a filesystem with newlib
+ *
+ * This function will take a prefix in the form of 'prefix:/' and a pointer
+ * to a filesystem structure of relevant callbacks and register it with newlib.
+ * Any standard open/fopen calls with the registered prefix will be passed
+ * to this filesystem.  Userspace code does not need to know the underlying
+ * filesystem, only the prefix that it has been registered under.
+ *
+ * The filesystem pointer passed in to this function should not go out of scope
+ * for the lifetime of the filesystem.
+ *
+ * @param[in] prefix
+ *            Prefix of the filesystem
+ * @param[in] filesystem
+ *            Structure of callbacks for various functions in the filesystem.
+ *            If the registered filesystem doesn't support an operation, it
+ *            should leave the callback null.
+ * 
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
  * @retval -1 if the parameters are invalid
  * @retval -2 if the prefix is already in use
  * @retval -3 if there are no more slots for filesystems
@@ -347,6 +368,7 @@ int hook_stdio_calls( stdio_t *stdio_calls );
  */
 int unhook_stdio_calls( stdio_t *stdio_calls );
 
+<<<<<<< HEAD
 /**
  * @brief Hook into POSIX time callbacks
  *
@@ -407,6 +429,27 @@ __attribute__((deprecated("use hook_time_calls instead")))
 int hook_time_call( time_t (*time_fn)( void ) );
 
 __attribute__((deprecated("use unhook_time_calls instead")))
+=======
+
+/**
+ * @brief Hook into gettimeofday with a current time callback.
+ *
+ * @param[in] time_fn
+ *            Pointer to callback for the current time function
+ *
+ * @return 0 if successful or a negative value on failure.
+ */
+int hook_time_call( time_t (*time_fn)( void ) );
+
+/**
+ * @brief Unhook from gettimeofday current time callback.
+ *
+ * @param[in] time_fn
+ *            Pointer to callback for the current time function
+ *
+ * @return 0 if successful or a negative value on failure.
+ */
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 int unhook_time_call( time_t (*time_fn)( void ) );
 
 /// @endcond

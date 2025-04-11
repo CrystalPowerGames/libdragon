@@ -4,6 +4,7 @@
  * @ingroup rtc
  */
 
+<<<<<<< HEAD
 #include "bb_rtc.h"
 #include "dd.h"
 #include "debug.h"
@@ -19,6 +20,16 @@
  * @addtogroup rtc
  * @{
  */
+=======
+#include <string.h>
+#include <time.h>
+#include <stdbool.h>
+#include "system.h"
+#include "n64sys.h"
+#include "joybus.h"
+#include "timer.h"
+#include "rtc.h"
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 /** @brief RTC initialization state enumeration */
 typedef enum {
@@ -278,7 +289,11 @@ void rtc_close( void )
     rtc_sync_result = RTC_ESUCCESS;
 }
 
+<<<<<<< HEAD
 rtc_source_t rtc_get_source( void )
+=======
+void rtc_normalize_time( rtc_time_t * rtc_time )
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 {
     assert( rtc_state != RTC_STATE_INIT );
     WAIT_FOR_RTC_READY();
@@ -286,6 +301,7 @@ rtc_source_t rtc_get_source( void )
     return rtc_source;
 }
 
+<<<<<<< HEAD
 int rtc_set_source( rtc_source_t source )
 {
     assert( rtc_state != RTC_STATE_INIT );
@@ -361,6 +377,8 @@ const char *rtc_error_str( int error )
 }
 
 /** @deprecated Use #rtc_get_time instead. */
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 bool rtc_get( rtc_time_t * rtc_time )
 {
     time_t current_time;
@@ -372,12 +390,67 @@ bool rtc_get( rtc_time_t * rtc_time )
     return true;
 }
 
+<<<<<<< HEAD
 /** @deprecated Use #rtc_set_time instead. */
 bool rtc_set( rtc_time_t * write_time )
 {
     struct tm timeinfo = rtc_time_to_tm( write_time );
     time_t new_time = mktime( &timeinfo );
     return rtc_set_time( new_time ) == RTC_ESUCCESS;
+=======
+bool rtc_set( rtc_time_t * write_time )
+{
+    /* libdragon currently only supports setting the time for Joybus RTC! */
+    if( rtc_present() != RTC_JOYBUS ) return false;
+
+    uint32_t calibration;
+    /* Read the calibration data from the control block */
+    joybus_rtc_read_control( NULL, &calibration );
+    /* Prepare the RTC to write the time, preserving the calibration data */
+    joybus_rtc_write_control( JOYBUS_RTC_CONTROL_MODE_SET, calibration );
+    wait_ms( JOYBUS_RTC_WRITE_BLOCK_DELAY );
+    /* Check the RTC status to make sure RTC "set mode" is supported */
+    if( !joybus_rtc_is_stopped() ) return false;
+    /* Ensure write_time is a valid RTC date/time */
+    rtc_normalize_time( write_time );
+    /* Write the updated time to RTC block 2 */
+    joybus_rtc_write_time( write_time );
+    wait_ms( JOYBUS_RTC_WRITE_BLOCK_DELAY );
+    /* Put the RTC back into normal operating mode */
+    joybus_rtc_write_control( JOYBUS_RTC_CONTROL_MODE_RUN, calibration );
+    wait_ms( JOYBUS_RTC_WRITE_BLOCK_DELAY );
+    /* Wait for the RTC to start running */
+    while( joybus_rtc_is_stopped() ) { /* Spinloop */ }
+    wait_ms( JOYBUS_RTC_WRITE_FINISHED_DELAY );
+    /* Invalidate the #rtc_get cache */
+    rtc_get_cache_ticks = 0;
+    return true;
 }
 
-/** @} */ /* rtc */
+bool rtc_is_writable( void )
+{
+    rtc_time_t restore_time;
+    rtc_time_t verify_time;
+    /* These values are arbitrary but unlikely to be the current date/time. */
+    rtc_time_t write_time = { 2003, 10, 3, 1, 2, 3, 0 };
+
+    rtc_get( &restore_time );
+
+    bool written = rtc_set( &write_time );
+    if( !written ) return false;
+
+    rtc_get( &verify_time );
+
+    bool verified = (
+        verify_time.year  == write_time.year  &&
+        verify_time.month == write_time.month &&
+        verify_time.day   == write_time.day   &&
+        verify_time.hour  == write_time.hour  &&
+        verify_time.min   == write_time.min
+    );
+
+    if( verified ) rtc_set( &restore_time );
+
+    return verified;
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
+}

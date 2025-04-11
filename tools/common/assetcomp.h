@@ -21,4 +21,8 @@ void asset_compress_mem_raw(int compression, const uint8_t *inbuf, int size, uin
 }
 #endif
 
+#ifdef __cplusplus
+}
+#endif
+
 #endif

@@ -18,7 +18,10 @@
 #include <time.h>
 #include "system.h"
 #include "n64sys.h"
+<<<<<<< HEAD
 #include "rtc_internal.h"
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 /**
  * @name STDIN/STDOUT/STDERR definitions from unistd.h
@@ -72,7 +75,10 @@ char *__env[1] = { 0 };
  */
 void (*__assert_func_ptr)(const char *file, int line, const char *func, const char *failedexpr) = 0;
 
+<<<<<<< HEAD
 /* Externs from libdragon */
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 /// @cond
 extern void enable_interrupts();
 extern void disable_interrupts();
@@ -1560,6 +1566,7 @@ int dir_findnext( const char * const path, dir_t *dir )
     return fs->findnext( dir );
 }
 
+<<<<<<< HEAD
 /**
  * @brief Create a directory.
  * 
@@ -1590,6 +1597,8 @@ int mkdir( const char * path, mode_t mode )
     return fs->mkdir( (char *)path + __strlen( filesystems[mapping].prefix ) - 1, mode );
 }
 
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 int hook_stdio_calls( stdio_t *stdio_calls )
 {
     if( stdio_calls == NULL )
@@ -1624,7 +1633,11 @@ int unhook_stdio_calls( stdio_t *stdio_calls )
     return 0;
 }
 
+<<<<<<< HEAD
 int hook_rtc_calls( rtc_hooks_t *hooks )
+=======
+int hook_time_call( time_t (*time_fn)( void ) )
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 {
     if( hooks == NULL ) return -1;
 
@@ -1634,7 +1647,11 @@ int hook_rtc_calls( rtc_hooks_t *hooks )
     return 0;
 }
 
+<<<<<<< HEAD
 int unhook_rtc_calls( rtc_hooks_t *hooks )
+=======
+int unhook_time_call( time_t (*time_fn)( void ) )
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 {
     if( hooks == NULL ) return -1;
 
@@ -1707,7 +1724,10 @@ void __assert_func(const char *file, int line, const char *func, const char *fai
         __assert_func_ptr(file, line, func, failedexpr);
     abort();
 }
+<<<<<<< HEAD
 
 #ifdef __NEWLIB__
 #include "system_newlib_locks.c"
 #endif
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf

@@ -92,7 +92,11 @@ typedef struct {
     void (*decompress_reset)(void *state);
 
     /** @brief Decompress a full file in one go */
+<<<<<<< HEAD
     bool (*decompress_full)(int fd, size_t cmp_size, size_t len, void *buf, int *buf_size);
+=======
+    void* (*decompress_full)(const char *fn, int fd, size_t cmp_size, size_t len);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
     /** @brief Decompress a full file in-place */
     int (*decompress_full_inplace)(const uint8_t *in, size_t cmp_size, uint8_t *out, size_t len);
@@ -101,8 +105,11 @@ typedef struct {
 
 FILE *must_fopen(const char *fn);
 int must_open(const char *fn);
+<<<<<<< HEAD
 void *asset_loadfd(int fd, int *sz);
 bool asset_loadfd_into(int fd, int *sz, void *buf, int *buf_size);
 FILE *asset_fdopen(int fd, int *sz);
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 #endif

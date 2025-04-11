@@ -16,8 +16,11 @@
 #include <stdbool.h>
 #include <math.h>
 
+<<<<<<< HEAD
 /** Invalid TLS Minimum Address */
 #define TLS_INVALID_MIN (uint32_t)(KERNEL_TP_INVALID-TP_OFFSET)
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 /**
  * @brief Syscall exception handler entry
  */
@@ -97,10 +100,13 @@ void __exception_dump_header(FILE *out, exception_t* ex) {
 			fprintf(out, "Watched address: %08lX\n", C0_WATCHLO() & ~3);
 			break;
 
+<<<<<<< HEAD
 		case EXCEPTION_CODE_SYS_CALL:
 			fprintf(out, "Syscall code: %05lX\n", (*(uint32_t*)ex->regs->epc >> 6) & 0xfffff);
 			break;
 
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 		case EXCEPTION_CODE_D_BUS_ERROR: {
 			uint32_t opcode = *(uint32_t*)epc;
 			uint64_t base = ex->regs->gpr[((opcode >> 21) & 0x1F)];

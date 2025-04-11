@@ -76,7 +76,11 @@ static void draw_actors()
     }
 }
 
+<<<<<<< HEAD
 static void update_actors(joypad_buttons_t keys)
+=======
+static void update_actors(struct controller_data keys)
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 {
     for(int i=0; i<MAX_ACTORS; i++) {
         if(actors[i]) {
@@ -107,16 +111,27 @@ int main()
     scr_height = display_get_height();
     //Init miscellaneous system
     dfs_init(DFS_DEFAULT_LOCATION);
+<<<<<<< HEAD
     joypad_init();
+=======
+    controller_init();
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
     //Setup scene
     create_actor(2, scr_width/2, scr_height/2);
     while(1) {
         surface_t *disp;
         //Update controller
+<<<<<<< HEAD
         joypad_poll();
         joypad_buttons_t keys = joypad_get_buttons_pressed(JOYPAD_PORT_1);
         //Do actor spawning
         if(keys.a) {
+=======
+        controller_scan();
+        struct controller_data keys = get_keys_down();
+        //Do actor spawning
+        if(keys.c[0].A) {
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
             //Spawn a random actor somewhere in the middle 80% of the screen
             float pos_x = (((float)rand()/RAND_MAX)*(scr_width*0.8f))+(scr_width*0.1f);
             float pos_y = (((float)rand()/RAND_MAX)*(scr_height*0.8f))+(scr_height*0.1f);

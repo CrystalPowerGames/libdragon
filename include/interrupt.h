@@ -178,6 +178,7 @@ void register_CART_handler( void (*callback)() );
  */
 void register_RESET_handler( void (*callback)() );
 
+<<<<<<< HEAD
 /**
  * @brief Register a BBPlayer FLASH callback
  *
@@ -241,6 +242,8 @@ void register_BB_BTN_handler( void (*callback)() );
  *            Function to call when a MD interrupt occurs
  */
 void register_BB_MD_handler( void (*callback)() );
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 /**
  * @brief Unregister an AI callback
@@ -318,6 +321,7 @@ void unregister_CART_handler( void (*callback)() );
  */
 void unregister_RESET_handler( void (*callback)() );
 
+<<<<<<< HEAD
 /**
  * @brief Unregister a BBPlayer FLASH interrupt callback
  *
@@ -381,6 +385,8 @@ void unregister_BB_BTN_handler( void (*callback)() );
  *            Function that should no longer be called on MD interrupts
  */
 void unregister_BB_MD_handler( void (*callback)() );
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 /**
  * @brief Enable or disable the AI interrupt

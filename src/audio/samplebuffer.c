@@ -184,7 +184,10 @@ void* samplebuffer_append(samplebuffer_t *buf, int wlen) {
 }
 
 void samplebuffer_undo(samplebuffer_t *buf, int wlen) {
+<<<<<<< HEAD
 	tracef("samplebuffer_truncate: wlen=%x\n", wlen);
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 	assertf(buf->widx >= wlen, "samplebuffer_append_undo: invalid wlen:%x widx:%x", wlen, buf->widx);
 	buf->widx -= wlen;
 }

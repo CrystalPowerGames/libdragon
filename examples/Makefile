@@ -4,6 +4,7 @@ EXAMPLES += brew-volley
 EXAMPLES += controllertest
 EXAMPLES += cpaktest
 EXAMPLES += cpak-utest
+<<<<<<< HEAD
 EXAMPLES += cpptest
 EXAMPLES += ctest
 EXAMPLES += customfont
@@ -18,6 +19,9 @@ EXAMPLES += micro-ui
 EXAMPLES += mixertest
 EXAMPLES += overlays
 EXAMPLES += pixelshader
+=======
+EXAMPLES += overlays
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 EXAMPLES += rdpqdemo
 EXAMPLES += rspqdemo
 EXAMPLES += rtctest

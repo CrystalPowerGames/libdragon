@@ -101,7 +101,11 @@ FILE *must_fopen(const char *fn)
     return fdopen(must_open(fn), "rb");
 }
 
+<<<<<<< HEAD
 static bool decompress_inplace(asset_compression_t *algo, int fd, size_t cmp_size, size_t size, int margin, void *buf, int *buf_size)
+=======
+static void* decompress_inplace(asset_compression_t *algo, const char *fn, int fd, size_t cmp_size, size_t size, int margin)
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 {
     // Consistency check on input data
     assert(margin >= 0);
@@ -249,6 +253,7 @@ void *asset_loadf(FILE *f, int *sz)
 
 void *asset_load(const char *fn, int *sz)
 {
+<<<<<<< HEAD
     void *buf = NULL; int buf_size = 0;
     int size;
     int fd = must_open(fn);
@@ -259,6 +264,51 @@ void *asset_load(const char *fn, int *sz)
     buf_size = asset_read_header(fd, &header, &size);
     buf = memalign(ASSET_ALIGNMENT, buf_size);
     asset_read(fd, &header, &size, buf, &buf_size);
+=======
+    uint8_t *s; int size;
+    int fd = must_open(fn);
+   
+    // Check if file is compressed
+    asset_header_t header;
+    read(fd, &header, sizeof(asset_header_t));
+    if (!memcmp(header.magic, ASSET_MAGIC, 3)) {
+        if (header.version != '3') {
+            assertf(0, "unsupported asset version: %c\nMake sure to rebuild libdragon tools and your assets", header.version);
+            return NULL;
+        }
+
+        #ifndef N64
+        header.algo = __builtin_bswap16(header.algo);
+        header.flags = __builtin_bswap16(header.flags);
+        header.cmp_size = __builtin_bswap32(header.cmp_size);
+        header.orig_size = __builtin_bswap32(header.orig_size);
+        header.inplace_margin = __builtin_bswap32(header.inplace_margin);
+        #endif
+
+        assertf(header.algo >= 1 || header.algo <= 3,
+            "unsupported compression algorithm: %d", header.algo);
+        assertf(algos[header.algo-1].decompress_full || algos[header.algo-1].decompress_full_inplace, 
+            "asset: compression level %d not initialized. Call asset_init_compression(%d) at initialization time", header.algo, header.algo);
+
+        size = header.orig_size;
+        if ((header.flags & ASSET_FLAG_INPLACE) && algos[header.algo-1].decompress_full_inplace)
+            s = decompress_inplace(&algos[header.algo-1], fn, fd, header.cmp_size, size, header.inplace_margin);
+        else
+            s = algos[header.algo-1].decompress_full(fn, fd, header.cmp_size, size);
+    } else {
+        // Allocate a buffer big enough to hold the file.
+        // We force a 32-byte alignment for the buffer so that it's aligned to instruction cache lines.
+        // This might or might not be useful, but if a binary file is laid out so that it
+        // matters, at least we guarantee that. 
+        size = lseek(fd, 0, SEEK_END);
+        s = memalign(ASSET_ALIGNMENT, size);
+
+        lseek(fd, 0, SEEK_SET);
+        read(fd, s, size);
+    }
+
+    close(fd);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
     if (sz) *sz = size;
     close(fd);
     return buf;
@@ -356,8 +406,11 @@ FILE *asset_fopen(const char *fn, int *sz)
     // Open the file. We use buffering on the outer file created by funopen,
     // so we don't actually need buffering on the underlying one.
     int fd = must_open(fn);
+<<<<<<< HEAD
     return asset_fdopen(fd, sz);
 }
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 FILE *asset_fdopen(int fd, int *sz)
 {
@@ -402,9 +455,14 @@ FILE *asset_fdopen(int fd, int *sz)
 
     // Not compressed. Return a wrapped FILE* without the seeking capability,
     // so that it matches the behavior of the compressed file.
+<<<<<<< HEAD
     int pos = lseek(fd, 0, SEEK_CUR);
     if (sz) *sz = lseek(fd, 0, SEEK_END);
     lseek(fd, pos - sizeof(asset_header_t), SEEK_SET);
+=======
+    if (sz) *sz = lseek(fd, 0, SEEK_END);
+    lseek(fd, 0, SEEK_SET);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
     cookie_none_t *cookie = malloc(sizeof(cookie_none_t));
     cookie->fd = fd;
     cookie->seeked = false;

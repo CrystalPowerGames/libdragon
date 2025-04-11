@@ -9,11 +9,16 @@
 #include "stb_ds.h"
 
 struct placeholder_data {
+<<<<<<< HEAD
 	int64_t offset;
 	uint64_t *pending_offsets_64;
 	uint32_t *pending_offsets_32;
 	uint16_t *pending_offsets_16;
 	uint8_t *pending_offsets_8;
+=======
+	int offset;
+	int *pending_offsets;
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 };
 
 struct {
@@ -103,9 +108,12 @@ void wpad(FILE *f, int size)
 
 struct placeholder_data *__placeholder_get_data(const char *name)
 {
+<<<<<<< HEAD
 	if(placeholder_hash == NULL) {
 		stbds_sh_new_arena(placeholder_hash);
 	}
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 	ptrdiff_t index = stbds_shgeti(placeholder_hash, name);
 	if(index == -1) {
 		struct placeholder_data default_value = {-1, NULL};
@@ -115,6 +123,7 @@ struct placeholder_data *__placeholder_get_data(const char *name)
 	return &placeholder_hash[index].value;
 }
 
+<<<<<<< HEAD
 void __placeholder_make(FILE *file, int64_t offset, const char *name)
 {
 	struct placeholder_data *data = __placeholder_get_data(name);
@@ -135,6 +144,19 @@ void __placeholder_make(FILE *file, int64_t offset, const char *name)
 	stbds_arrfree(data->pending_offsets_32);
 	stbds_arrfree(data->pending_offsets_16);
 	stbds_arrfree(data->pending_offsets_8);
+=======
+void __placeholder_make(FILE *file, int offset, const char *name)
+{
+	if(placeholder_hash == NULL) {
+		stbds_sh_new_arena(placeholder_hash);
+	}
+	struct placeholder_data *data = __placeholder_get_data(name);
+	data->offset = offset;
+	for(size_t i=0; i<stbds_arrlenu(data->pending_offsets); i++) {
+		w32_at(file, data->pending_offsets[i], data->offset);
+	}
+	stbds_arrfree(data->pending_offsets);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 }
 
 void placeholder_setv(FILE *file, const char *format, va_list arg)
@@ -153,7 +175,11 @@ void placeholder_set(FILE *file, const char *format, ...)
 	va_end(args);
 }
 
+<<<<<<< HEAD
 void placeholder_setv_offset(FILE *file, int64_t offset, const char *format, va_list arg)
+=======
+void placeholder_setv_offset(FILE *file, int offset, const char *format, va_list arg)
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 {
 	char *name = NULL;
 	vasprintf(&name, format, arg);
@@ -161,7 +187,11 @@ void placeholder_setv_offset(FILE *file, int64_t offset, const char *format, va_
 	free(name);
 }
 
+<<<<<<< HEAD
 void placeholder_set_offset(FILE *file, int64_t offset, const char *format, ...)
+=======
+void placeholder_set_offset(FILE *file, int offset, const char *format, ...)
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 {
 	va_list args;
 	va_start(args, format);
@@ -169,6 +199,7 @@ void placeholder_set_offset(FILE *file, int64_t offset, const char *format, ...)
 	va_end(args);
 }
 
+<<<<<<< HEAD
 void __w64_placeholder_named(FILE *file, const char *name)
 {
 	struct placeholder_data *data = __placeholder_get_data(name);
@@ -185,12 +216,24 @@ void __w32_placeholder_named(FILE *file, const char *name)
 	struct placeholder_data *data = __placeholder_get_data(name);
 	if(data->offset == -1) {
 		stbds_arrpush(data->pending_offsets_32, ftell(file));
+=======
+
+void __w32_placeholder_named(FILE *file, const char *name)
+{
+	if(placeholder_hash == NULL) {
+		stbds_sh_new_arena(placeholder_hash);
+	}
+	struct placeholder_data *data = __placeholder_get_data(name);
+	if(data->offset == -1) {
+		stbds_arrpush(data->pending_offsets, ftell(file));
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 		w32(file, 0);
 	} else {
 		w32(file, data->offset);
 	}
 }
 
+<<<<<<< HEAD
 void __w16_placeholder_named(FILE *file, const char *name)
 {
 	struct placeholder_data *data = __placeholder_get_data(name);
@@ -229,6 +272,8 @@ void w64_placeholderf(FILE *file, const char *format, ...)
 	va_end(args);
 }
 
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 void w32_placeholdervf(FILE *file, const char *format, va_list arg)
 {
 	char *name = NULL;
@@ -245,6 +290,7 @@ void w32_placeholderf(FILE *file, const char *format, ...)
 	va_end(args);
 }
 
+<<<<<<< HEAD
 void w16_placeholdervf(FILE *file, const char *format, va_list arg)
 {
 	char *name = NULL;
@@ -284,6 +330,12 @@ void placeholder_clear()
 		stbds_arrfree(placeholder_hash[i].value.pending_offsets_32);
 		stbds_arrfree(placeholder_hash[i].value.pending_offsets_16);
 		stbds_arrfree(placeholder_hash[i].value.pending_offsets_8);
+=======
+void placeholder_clear()
+{
+	for(size_t i=0; i<stbds_shlenu(placeholder_hash); i++) {
+		stbds_arrfree(placeholder_hash[i].value.pending_offsets);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 	}
 	stbds_shfree(placeholder_hash);
 }

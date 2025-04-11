@@ -9,6 +9,7 @@ N64_ROM_CATEGORY = # Set an N64 Media Category code in the ROM header (N, D, C, 
 N64_ROM_SAVETYPE = # Supported savetypes: none eeprom4k eeprom16 sram256k sram768k sram1m flashram
 N64_ROM_RTC = # Set to true to enable the Joybus Real-Time Clock
 N64_ROM_REGIONFREE = # Set to true to allow booting on any console region
+<<<<<<< HEAD
 N64_ROM_REGION = # Set to a region code (emulators will boot on a specific console region)
 N64_ROM_ELFCOMPRESS ?= 1 # Set compression level of ELF file in ROM
 N64_ROM_DSOCOMPRESS ?= 1 # Set compression level of DSOs file in ROM
@@ -24,6 +25,10 @@ N64_ROM_CONTROLLER4 = # Sets the type of Controller 4 in the Advanced Homebrew H
 # tiny3d:
 # 	$(MAKE) -C $(T3D_INST) N64_BACKTRACE_FILE_PREFIX=tiny3d
 N64_BACKTRACE_FILE_PREFIX=
+=======
+N64_ROM_ELFCOMPRESS = 1 # Set compression level of ELF file in ROM
+N64_ROM_DSOCOMPRESS ?= 1 # Set compression level of DSOs file in ROM
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 # Override this to use a toolchain installed separately from libdragon
 N64_GCCPREFIX ?= $(N64_INST)
@@ -53,8 +58,11 @@ N64_SYM = $(N64_BINDIR)/n64sym
 N64_ELFCOMPRESS = $(N64_BINDIR)/n64elfcompress
 N64_AUDIOCONV = $(N64_BINDIR)/audioconv64
 N64_MKSPRITE = $(N64_BINDIR)/mksprite
+<<<<<<< HEAD
 N64_MKFONT = $(N64_BINDIR)/mkfont
 N64_MKMODEL = $(N64_BINDIR)/mkmodel
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 N64_DSO = $(N64_BINDIR)/n64dso
 N64_DSOEXTERN = $(N64_BINDIR)/n64dso-extern
 N64_DSOMSYM = $(N64_BINDIR)/n64dso-msym
@@ -74,9 +82,12 @@ N64_LDFLAGS = -g -L$(N64_LIBDIR) -ldragon -lm -ldragonsys -Tn64.ld --gc-sections
 N64_DSOLDFLAGS = --emit-relocs --unresolved-symbols=ignore-all --nmagic -T$(N64_LIBDIR)/dso.ld
 
 N64_TOOLFLAGS = --title $(N64_ROM_TITLE)
+<<<<<<< HEAD
 N64_TOOLFLAGS += $(if $(N64_ROM_HEADER),--header $(N64_ROM_HEADER))
 N64_TOOLFLAGS += $(if $(N64_ROM_CATEGORY),--category $(N64_ROM_CATEGORY))
 N64_TOOLFLAGS += $(if $(N64_ROM_REGION),--region $(N64_ROM_REGION))
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 N64_ED64ROMCONFIGFLAGS =  $(if $(N64_ROM_SAVETYPE),--savetype $(N64_ROM_SAVETYPE))
 N64_ED64ROMCONFIGFLAGS += $(if $(N64_ROM_RTC),--rtc) 
 N64_ED64ROMCONFIGFLAGS += $(if $(N64_ROM_REGIONFREE),--regionfree)
@@ -239,7 +250,11 @@ $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.cpp
 %.msym: %.elf
 	@echo "    [MSYM] $@"
 	$(N64_DSOMSYM) $< $@
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 ifneq ($(V),1)
 .SILENT:
 endif

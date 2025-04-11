@@ -17,7 +17,11 @@
 #define _wconv(type, v) ({ \
     typeof(v) _v = (v); \
     if (sizeof(type) < sizeof(_v)) { \
+<<<<<<< HEAD
         int64_t ext = (int64_t)_v >> (sizeof(type) * 8 - 1) >> 1; \
+=======
+        int64_t ext = (int64_t)_v >> (sizeof(type) * 8); \
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
         if (ext != 0 && ext != (uint64_t)-1) { \
             fprintf(stderr, "fatal: truncating value %lld to %s (ext=%lld)\n", (long long)_v, #type, (long long)ext); \
             assert(ext == 0 || ext == (uint64_t)-1); \
@@ -32,8 +36,13 @@ extern "C" {
 
 void placeholder_setv(FILE *file, const char *format, va_list arg);
 void placeholder_set(FILE *file, const char *format, ...);
+<<<<<<< HEAD
 void placeholder_setv_offset(FILE *file, int64_t offset, const char *format, va_list arg);
 void placeholder_set_offset(FILE *file, int64_t offset, const char *format, ...);
+=======
+void placeholder_setv_offset(FILE *file, int offset, const char *format, va_list arg);
+void placeholder_set_offset(FILE *file, int offset, const char *format, ...);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 void placeholder_clear();
 
 void _w8(FILE *f, uint8_t v);
@@ -46,15 +55,19 @@ void _w64(FILE *f, uint64_t v);
 #define w64(f, v) _w64(f, _wconv(uint64_t, v))
 #define wf32(f, v) _w32(f, BITCAST_F2I(v))
 #define wf32approx(f, v, prec) wf32(f, roundf((v)/(prec))*(prec))
+<<<<<<< HEAD
 #define wa(f, v, s) fwrite(v, s, 1, f)
 
 int w64_placeholder(FILE *f);
 void w64_placeholdervf(FILE *file, const char *format, va_list arg);
 void w64_placeholderf(FILE *file, const char *format, ...);
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 int w32_placeholder(FILE *f);
 void w32_placeholdervf(FILE *file, const char *format, va_list arg);
 void w32_placeholderf(FILE *file, const char *format, ...);
+<<<<<<< HEAD
 
 int w16_placeholder(FILE *f);
 void w16_placeholdervf(FILE *file, const char *format, va_list arg);
@@ -73,6 +86,9 @@ void _w8_at(FILE *f, int pos, uint8_t v);
 #define w16_at(f, pos, v) _w16_at(f, pos, _wconv(uint16_t, v))
 #define w8_at(f, pos, v) _w8_at(f, pos, _wconv(uint8_t, v))
 
+=======
+void w32_at(FILE *f, int pos, uint32_t v);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 void walign(FILE *f, int align);
 void wpad(FILE *f, int size);
 

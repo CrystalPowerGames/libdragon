@@ -19,7 +19,11 @@ void decompress_aplib_reset(void *state);
 #if DECOMPRESS_APLIB_FULL_USE_ASM
 int decompress_aplib_full_inplace(const uint8_t* in, size_t cmp_size, uint8_t *out, size_t size);
 #else
+<<<<<<< HEAD
 bool decompress_aplib_full(int fd, size_t cmp_size, size_t size, void *buf, int *buf_size);
+=======
+void* decompress_aplib_full(const char *fn, int fd, size_t cmp_size, size_t size);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 #endif
 
 #endif

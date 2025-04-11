@@ -7,9 +7,13 @@
 #include "mixer_internal.h"
 #include "samplebuffer.h"
 #include "utils.h"
+<<<<<<< HEAD
 #include "n64types.h"
 #include <unistd.h>
 #include <limits.h>
+=======
+#include <unistd.h>
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 #include <string.h>
 
 
@@ -127,6 +131,7 @@ static inline void rsp_vadpcm_decompress(void *input, int16_t *output, bool ster
 		PhysicalAddr(codebook));
 }
 
+<<<<<<< HEAD
 // Copy the VADPCM state. If src is NULL, the state is cleared.
 // This is basically a memcpy but performed by RSP, so it's in-order with the
 // other RSP operations.
@@ -232,6 +237,25 @@ static void waveform_vadpcm_read(void *ctx, samplebuffer_t *sbuf, int wpos, int 
         if ((vhead->flags & VADPCM_FLAG_HUFFMAN) == 0)
             lseek(wav->st->current_fd, wav->st->base_offset + (wpos / 16) * 9, SEEK_SET);
     }
+=======
+#endif /* VADPCM_REFERENCE_DECODER */
+
+static void waveform_vadpcm_read(void *ctx, samplebuffer_t *sbuf, int wpos, int wlen, bool seeking) {
+	wav64_t *wav = (wav64_t*)ctx;
+	wav64_header_vadpcm_t *vhead = (wav64_header_vadpcm_t*)wav->ext;
+
+	if (seeking) {
+		if (wpos == 0) {
+			memset(&vhead->state, 0, sizeof(vhead->state));
+			lseek(wav->current_fd, wav->base_offset, SEEK_SET);
+		} else {
+			assertf(wpos == wav->wave.len - wav->wave.loop_len,
+				"wav64: seeking to %x not supported (%x %x)\n", wpos, wav->wave.len, wav->wave.loop_len);
+			memcpy(&vhead->state, &vhead->loop_state, sizeof(vhead->state));
+			lseek(wav->current_fd, (wav->wave.len - wav->wave.loop_len) / 16 * 9, SEEK_CUR);
+		}
+	}
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 	// Round up wlen to 32 because our RSP decompressor only supports multiples
 	// of 32 samples (2 frames) because of DMA alignment issues. audioconv64
@@ -244,6 +268,10 @@ static void waveform_vadpcm_read(void *ctx, samplebuffer_t *sbuf, int wpos, int 
 	// RSP call. Keep this in sync with rsp_mixer.S.
 	enum { MAX_VADPCM_FRAMES = 94 };
 
+<<<<<<< HEAD
+=======
+	bool highpri = false;
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 	while (wlen > 0) {
 		// Calculate number of frames to decompress in this iteration
 		int max_vadpcm_frames = (wav->wave.channels == 1) ? MAX_VADPCM_FRAMES : MAX_VADPCM_FRAMES / 2;
@@ -259,6 +287,7 @@ static void waveform_vadpcm_read(void *ctx, samplebuffer_t *sbuf, int wpos, int 
 		void *src = (void*)dest + ((nframes*16) << SAMPLES_BPS_SHIFT(sbuf)) - src_bytes;
 
 		// Fetch compressed data
+<<<<<<< HEAD
         if (vhead->flags & VADPCM_FLAG_HUFFMAN) {
             void *scratch = dest;
             int scratch_size = ROUND_UP(((void*)src - (void*)dest) / 2, 16);
@@ -273,11 +302,20 @@ static void waveform_vadpcm_read(void *ctx, samplebuffer_t *sbuf, int wpos, int 
             int read_bytes = read(wav->st->current_fd, CachedAddr(src), src_bytes);
             assertf(src_bytes == read_bytes, "invalid read past end: %d vs %d", src_bytes, read_bytes);
         }
+=======
+		// FIXME: remove CachedAddr() when read() supports uncached addresses
+		int read_bytes = read(wav->current_fd, CachedAddr(src), src_bytes);
+		assertf(src_bytes == read_bytes, "invalid read past end: %d vs %d", src_bytes, read_bytes);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 		#if VADPCM_REFERENCE_DECODER
 		if (wav->wave.channels == 1) {
 			vadpcm_error err = vadpcm_decode(
+<<<<<<< HEAD
 				vhead->npredictors, vhead->order, vhead->codebook, vstate->state,
+=======
+				vhead->npredictors, vhead->order, vhead->codebook, vhead->state,
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 				nframes, dest, src);
 			assertf(err == 0, "VADPCM decoding error: %d\n", err);
 		} else {
@@ -288,7 +326,11 @@ static void waveform_vadpcm_read(void *ctx, samplebuffer_t *sbuf, int wpos, int 
 			for (int i=0; i<nframes; i++) {
 				for (int j=0; j<2; j++) {
 					vadpcm_error err = vadpcm_decode(
+<<<<<<< HEAD
 						vhead->npredictors, vhead->order, vhead->codebook + 8*j, &vstate->state[j],
+=======
+						vhead->npredictors, vhead->order, vhead->codebook + 8*j, &vhead->state[j],
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 						1, uncomp[j], src);
 					assertf(err == 0, "VADPCM decoding error: %d\n", err);
 					src += 9;
@@ -305,7 +347,11 @@ static void waveform_vadpcm_read(void *ctx, samplebuffer_t *sbuf, int wpos, int 
 			rspq_highpri_begin();
 			highpri = true;
 		}
+<<<<<<< HEAD
 		rsp_vadpcm_decompress(src, dest, wav->wave.channels==2, nframes, vstate->state, vhead->codebook);
+=======
+		rsp_vadpcm_decompress(src, dest, wav->wave.channels==2, nframes, vhead->state, vhead->codebook);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 		#endif
 
 		wlen -= 16*nframes;
@@ -321,6 +367,7 @@ static void waveform_vadpcm_read(void *ctx, samplebuffer_t *sbuf, int wpos, int 
     }
 }
 
+<<<<<<< HEAD
 static void waveform_vadpcm_stop(void *ctx, samplebuffer_t *sbuf) {
 	wav64_t *wav = (wav64_t*)sbuf->wave;
 
@@ -372,25 +419,48 @@ void wav64_vadpcm_init(wav64_t *wav, int state_size)
     // Flush cached state; it will be manipulated by RSP only
     wav64_state_vadpcm_t *vstate = (wav64_state_vadpcm_t*)wav->st->states;
     data_cache_hit_writeback_invalidate(vstate, wav->st->nsimul * sizeof(wav64_state_vadpcm_t));
+=======
+void wav64_vadpcm_init(wav64_t *wav)
+{
+    wav64_header_vadpcm_t vhead = {0};
+    read(wav->current_fd, &vhead, sizeof(vhead));
+    int codebook_size = vhead.npredictors * vhead.order * wav->wave.channels * sizeof(wav64_vadpcm_vector_t);
+
+    void *ext = malloc_uncached(sizeof(vhead) + codebook_size);
+    memcpy(ext, &vhead, sizeof(vhead));
+    // FIXME: remove CachedAddr() when read() supports uncached addresses
+    read(wav->current_fd, CachedAddr(ext + sizeof(vhead)), codebook_size);
+    wav->ext = ext;
+    wav->wave.read = waveform_vadpcm_read;
+    wav->wave.ctx = wav;
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
     // This should never happen as audioconv64 handles this.
     assertf(wav->wave.loop_len == 0 || wav->wave.loop_len % 16 == 0, 
         "wav64: invalid loop length for VADPCM: %d\n", wav->wave.loop_len);
+<<<<<<< HEAD
 
     // Init huffman
     wav64_header_vadpcm_t *vhead = (wav64_header_vadpcm_t*)wav->st->ext;
     if (vhead->flags & VADPCM_FLAG_HUFFMAN) {
         wav64_vadpcm_init_huffman(wav);
     }
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 }
 
 void wav64_vadpcm_close(wav64_t *wav)
 {
+<<<<<<< HEAD
     wav64_header_vadpcm_t *vhead = (wav64_header_vadpcm_t*)wav->st->ext;
     if (vhead->huff_tbl) {
         free(vhead->huff_tbl);
         vhead->huff_tbl = NULL;
     }
+=======
+    free_uncached(wav->ext);
+    wav->ext = NULL;
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 }
 
 int wav64_vadpcm_get_bitrate(wav64_t *wav)

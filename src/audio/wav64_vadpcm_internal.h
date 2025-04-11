@@ -1,6 +1,7 @@
 #ifndef LIBDRAGON_AUDIO_VADPCM_INTERNAL_H
 #define LIBDRAGON_AUDIO_VADPCM_INTERNAL_H
 
+<<<<<<< HEAD
 #define VADPCM_FLAG_HUFFMAN      (1 << 0)	///< Huffman-encoded VADPCM
 
 /** @brief A vector of audio samples */
@@ -38,6 +39,9 @@ typedef struct __attribute__((aligned(16))) {
 } wav64_state_vadpcm_t;
 
 void wav64_vadpcm_init(wav64_t *wav, int state_size);
+=======
+void wav64_vadpcm_init(wav64_t *wav);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 void wav64_vadpcm_close(wav64_t *wav);
 int wav64_vadpcm_get_bitrate(wav64_t *wav);
 

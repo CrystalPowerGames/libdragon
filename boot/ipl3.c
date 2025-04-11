@@ -264,9 +264,14 @@ void stage1(void)
     entropy_init();
     usb_init();
     debugf("Libdragon IPL3");
+<<<<<<< HEAD
 
     entropy_add(C0_COUNT());
     entropy_add(*DP_CLOCK);    
+=======
+    
+    entropy_add(C0_COUNT());
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
     C0_WRITE_CAUSE(0);
     C0_WRITE_COUNT(0);
     C0_WRITE_COMPARE(0);
@@ -321,12 +326,15 @@ void stage1(void)
             }
         }
 
+<<<<<<< HEAD
         // If this is a warm boot, try to add entropy stored by the previous IPL3
         // run. This is just a best-effort; if it was destroyed, we'll just fetch
         // whatever is there.
         if (ipl2_resetType == 1)
             entropy_add(*RDRAM_ENTROPY_STATE);
 
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
         // Clear memory. Skip the first 0x400 bytes of RAM because it
         // historically contains some boot flags that some existing code
         // might expect to stay there.

@@ -211,6 +211,10 @@ void audio_write(const short * const buffer);
 }
 #endif
 
+<<<<<<< HEAD
 /** @} */ /* display */
+=======
+/** @} */ /* audio */
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 #endif

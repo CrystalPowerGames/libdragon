@@ -20,6 +20,7 @@
  * @deprecated This module is now deprecated.
  *             Please use the @ref joypad "Joypad Subsystem" instead.
  *
+<<<<<<< HEAD
  * This module contains an old API to communicate with controllers and accessories.
  * The API had several deficiencies, notably implementing partial support for
  * GameCube controllers, but only supporting asynchronous reading of N64 controllers.
@@ -33,6 +34,29 @@
  * The functions have all been explicitly marked as deprecated, and will generate a
  * warning at compile time. The warning suggests the alternative Joypad API to use
  * instead. In most cases, the change should be straightforward.
+=======
+ * To perform direct reads to the controllers, call #controller_read.  This will
+ * return a structure consisting of all button states on all controllers currently
+ * inserted. Note that this function takes about 10% of a frame's worth of time.
+ *
+ * Controllers can be enumerated with 
+ * #get_controllers_present.  Similarly, accessories can be enumerated with
+ * #get_accessories_present and #identify_accessory.
+ *
+ * To enable or disable rumbling on a controller, use #rumble_start and #rumble_stop.
+ * These functions will turn rumble on and off at full speed respectively, so if
+ * different rumble effects are desired, consider using the @ref timer for accurate
+ * timing.
+ *
+ * A mempak attached to a controller can be treated in one of two ways: as a raw binary
+ * string, or as a formatted mempak with notes.  The former allows storage of any
+ * data as long as it fits, in any format convenient to the coder, but destroys any
+ * non-homebrew data on the mempak.  The latter is recommended as it is completely
+ * compatible with official N64 games, though it allows less data to be stored due to
+ * filesystem overhead.  To read and write raw sectors, use #read_mempak_address and
+ * #write_mempak_address.  The @ref controllerpak handles reading and writing from the mempak
+ * in a way compatible with official games.
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
  *
  * @{
  */

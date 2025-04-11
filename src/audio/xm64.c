@@ -5,7 +5,10 @@
  */
 
 #include "xm64.h"
+<<<<<<< HEAD
 #include "wav64.h"
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 #include "mixer.h"
 #include "audio.h"
 #include <assert.h>
@@ -18,6 +21,7 @@
 #include "libxm/xm_internal.h"
 #include <stdbool.h>
 #include <stdio.h>
+<<<<<<< HEAD
 #include <unistd.h>
 
 static char *xm64_extsampledir = NULL;
@@ -27,6 +31,12 @@ static void stop(xm_context_t *ctx, xm64player_t *xmp) {
 		mixer_ch_stop(xmp->first_ch+i);
 	xmp->playing = false;
 	xmp->stop_requested = false;
+=======
+
+static void wave_read(void *ctx, samplebuffer_t *sbuf, int wpos, int wlen, bool seeking) {
+	xm_sample_t *samp = (xm_sample_t*)ctx;
+	raw_waveform_read_address(sbuf, samp->data8_offset, wpos, wlen, samp->bits >> 4);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 }
 
 static int tick(void *arg) {
@@ -40,8 +50,17 @@ static int tick(void *arg) {
 	}
 
 	// If we're requested to stop playback, do it.
+<<<<<<< HEAD
 	if (xmp->stop_requested) {
 		stop(ctx, xmp);
+=======
+	if (xmp->stop_requested || (!xmp->looping && ctx->loop_count > 0)) {
+		for (int i=0;i<ctx->module.num_channels;i++)
+			mixer_ch_stop(xmp->first_ch+i);
+		xmp->playing = false;
+		xmp->stop_requested = false;
+		// Do not reschedule again
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 		return 0;
 	}
 
@@ -152,6 +171,7 @@ void xm64player_open(xm64player_t *player, const char *fn) {
 
 	fclose(fh);
 
+<<<<<<< HEAD
 	// Reopen as unbuffered file descriptor. This will be used for streaming.
 	player->fd = must_open(fn);
 	player->ctx->fd = player->fd;
@@ -164,6 +184,18 @@ void xm64player_open(xm64player_t *player, const char *fn) {
 		
 	// Open all embedded wav64 files
 	for (int i=0; i<xm_get_number_of_instruments(player->ctx); i++) {
+=======
+	// Count samples
+	int ninst = xm_get_number_of_instruments(player->ctx);
+	for (int i=0;i<ninst;i++)
+		player->nwaves += xm_get_number_of_samples(player->ctx, i+1);
+
+	// Allocate waveforms (one per XM64's "samples" aka waveforms)
+	player->waves = malloc(sizeof(waveform_t) * player->nwaves);
+	assert(player->waves);
+	int nw = 0;
+	for (int i=0;i<ninst;i++) {
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 		xm_instrument_t *inst = &player->ctx->module.instruments[i];
 		for (int j=0;j<inst->num_samples;j++) {
 			xm_sample_t *samp = &inst->samples[j];
@@ -262,6 +294,15 @@ void xm64player_close(xm64player_t *player) {
 	for (int i=0;i<player->ctx->module.num_channels;i++) {
 		mixer_ch_stop(player->first_ch+i);
 		mixer_ch_set_limits(player->first_ch+i, 0, 0, 0);
+<<<<<<< HEAD
+=======
+	}
+	enable_interrupts();
+
+	if (player->fh != NULL) {
+		fclose(player->fh);
+		player->fh = NULL;
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 	}
 
 	// Close all embedded wav64 files

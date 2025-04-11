@@ -38,17 +38,30 @@ SpriteTest::~SpriteTest()
 
 void SpriteTest::Update()
 {
+<<<<<<< HEAD
     joypad_buttons_t cont_data = joypad_get_buttons_pressed(JOYPAD_PORT_1);
     if(cont_data.start) {
+=======
+    struct controller_data cont_data = get_keys_down();
+    if(cont_data.c[0].start) {
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
         SceneMgr::SetNextScene("bg_test");
         return;
     }
     //Add new sprite when pressing A
+<<<<<<< HEAD
     if(cont_data.a && m_num_sprites < MAX_SPRITES) {
         SpawnSprite();
     }
     //Remove last sprite when pressing B
     if(cont_data.b && m_num_sprites > 0) {
+=======
+    if(cont_data.c[0].A && m_num_sprites < MAX_SPRITES) {
+        SpawnSprite();
+    }
+    //Remove last sprite when pressing B
+    if(cont_data.c[0].B && m_num_sprites > 0) {
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
         m_num_sprites--;
     }
     UpdateSprites();

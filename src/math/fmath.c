@@ -42,6 +42,13 @@ float fm_sinf_approx(float x, int approx) {
     // to the 5 ULP figure.
     x = fm_fmodf(x+pi_hi, 2*pi_hi) - pi_hi;
     x = sinf_approx(x, approx);
+<<<<<<< HEAD:src/math/fmath.c
+=======
+    // FIXME: workaround for a bug in our sinf approximation. We found at least
+    // one input (0xbfc915a2 => -1.570973) that produces an out of bounds result
+    // -1.000000119209289551 (0xbf800001).
+    x = CLAMP(x, -1.0f, 1.0f);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf:src/fmath.c
     return x;
 }
 

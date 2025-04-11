@@ -50,6 +50,7 @@ typedef struct {
     uint32_t frame_size;            ///< Size of an audioframe in samples
     uint32_t max_cmp_frame_size;    ///< Maximum compressed frame size in bytes
     uint32_t bitrate_bps;           ///< Bitrate in bits per second
+<<<<<<< HEAD
     OpusCustomMode *mode;           ///< Opus custom mode for this file
 } wav64_opus_header_ext;
 
@@ -62,6 +63,25 @@ static void waveform_opus_read(void *ctx, samplebuffer_t *sbuf, int wpos, int wl
 		if (wpos == 0) {
 			lseek(wav->st->current_fd, wav->st->base_offset, SEEK_SET);
 			opus_custom_decoder_ctl(dec, OPUS_RESET_STATE);
+=======
+} wav64_opus_header_ext;
+
+/// @brief Wav64 Opus state
+typedef struct {
+    wav64_opus_header_ext xhead;    ///< Opus header extension
+    OpusCustomMode *mode;           ///< Opus custom mode for this file
+    OpusCustomDecoder *dec;         ///< Opus decoder for this file
+} wav64_opus_state;
+
+static void waveform_opus_read(void *ctx, samplebuffer_t *sbuf, int wpos, int wlen, bool seeking) {
+	wav64_t *wav = (wav64_t*)ctx;
+	wav64_opus_state *st = (wav64_opus_state*)wav->ext;
+
+	if (seeking) {
+		if (wpos == 0) {
+			lseek(wav->current_fd, wav->base_offset, SEEK_SET);
+			opus_custom_decoder_ctl(st->dec, OPUS_RESET_STATE);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 		} else {
 			assertf(0, "seeking not support in wav64 with opus compression");
 		}
@@ -69,21 +89,35 @@ static void waveform_opus_read(void *ctx, samplebuffer_t *sbuf, int wpos, int wl
 
     // Allocate stack buffer for reading compressed data. Align it to cacheline
     // to avoid any false sharing.
+<<<<<<< HEAD
     uint8_t alignas(16) buf[ext->max_cmp_frame_size + 1];
     int nframes = DIVIDE_CEIL(wlen, ext->frame_size);
+=======
+    uint8_t alignas(16) buf[st->xhead.max_cmp_frame_size + 1];
+    int nframes = DIVIDE_CEIL(wlen, st->xhead.frame_size);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
     // Make space for the decoded samples. Call samplebuffer_append once as we
     // use RSP in background, and each call to the function might trigger a
     // memmove of internal samples.
+<<<<<<< HEAD
     int16_t *out = samplebuffer_append(sbuf, ext->frame_size*nframes);
+=======
+    int16_t *out = samplebuffer_append(sbuf, st->xhead.frame_size*nframes);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
     for (int i=0; i<nframes; i++) {
         assert(wpos < wav->wave.len);
 
         // Read frame size
         uint16_t nb = 0;
+<<<<<<< HEAD
         read(wav->st->current_fd, &nb, 2);
         assertf(nb <= ext->max_cmp_frame_size, "opus frame size too large: %08X (%ld)", nb, ext->max_cmp_frame_size);
+=======
+        read(wav->current_fd, &nb, 2);
+        assertf(nb <= st->xhead.max_cmp_frame_size, "opus frame size too large: %08X (%ld)", nb, st->xhead.max_cmp_frame_size);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
         unsigned long aligned_frame_size = nb; 
         if (aligned_frame_size & 1) {
@@ -92,6 +126,7 @@ static void waveform_opus_read(void *ctx, samplebuffer_t *sbuf, int wpos, int wl
 
         // Read frame
         data_cache_hit_writeback_invalidate(buf, aligned_frame_size);
+<<<<<<< HEAD
         int size = read(wav->st->current_fd, buf, aligned_frame_size);
         assertf(size == aligned_frame_size, "opus read past end: %d", size);
 
@@ -103,6 +138,19 @@ static void waveform_opus_read(void *ctx, samplebuffer_t *sbuf, int wpos, int wl
         out += ext->frame_size * wav->wave.channels;
         wpos += ext->frame_size;
         wlen -= ext->frame_size;
+=======
+        int size = read(wav->current_fd, buf, aligned_frame_size);
+        assertf(size == aligned_frame_size, "opus read past end: %d", size);
+
+        // Decode frame
+        int err = opus_custom_decode(st->dec, buf, nb, out, st->xhead.frame_size);
+        assertf(err > 0, "opus decode error: %s", opus_strerror(err));
+        assertf(err == st->xhead.frame_size, "opus wrong frame size: %d (exp: %lx)", err, st->xhead.frame_size);
+
+        out += st->xhead.frame_size * wav->wave.channels;
+        wpos += st->xhead.frame_size;
+        wlen -= st->xhead.frame_size;
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
     }
 
     if (wav->wave.loop_len && wpos >= wav->wave.len) {
@@ -111,6 +159,7 @@ static void waveform_opus_read(void *ctx, samplebuffer_t *sbuf, int wpos, int wl
     }
 }
 
+<<<<<<< HEAD
 static void waveform_opus_stop(void *ctx, samplebuffer_t *sbuf) {
 	wav64_t *wav = (wav64_t*)sbuf->wave;
 
@@ -149,4 +198,41 @@ void wav64_opus_close(wav64_t *wav) {
 int wav64_opus_get_bitrate(wav64_t *wav) {
     wav64_opus_header_ext *ext = wav->st->ext;
     return ext->bitrate_bps;
+=======
+void wav64_opus_init(wav64_t *wav) {
+    wav64_opus_header_ext xhead;
+    read(wav->current_fd, &xhead, sizeof(xhead));
+
+    rsp_opus_init();
+
+    int err = OPUS_OK;
+    OpusCustomMode *custom_mode = opus_custom_mode_create(wav->wave.frequency, xhead.frame_size, &err);
+    assertf(err == OPUS_OK, "%i", err);
+    OpusCustomDecoder *dec = opus_custom_decoder_create(custom_mode, wav->wave.channels, &err);
+    assert(err == OPUS_OK);
+
+    // FIXME: try to avoid one allocation by allocating the decoder in the same malloc
+    wav64_opus_state *state = malloc(sizeof(wav64_opus_state));
+    state->mode = custom_mode;
+    state->dec = dec;
+    state->xhead = xhead;
+ 
+    wav->ext = state;
+    wav->wave.read = waveform_opus_read;
+    wav->wave.ctx = wav;
+}
+
+void wav64_opus_close(wav64_t *wav) {
+ 	wav64_opus_state *st = (wav64_opus_state*)wav->ext;
+
+    opus_custom_decoder_destroy(st->dec);
+    opus_custom_mode_destroy(st->mode);
+    free(st);
+    wav->ext = NULL;
+}
+
+int wav64_opus_get_bitrate(wav64_t *wav) {
+    wav64_opus_state *st = (wav64_opus_state*)wav->ext;
+    return st->xhead.bitrate_bps;
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 }

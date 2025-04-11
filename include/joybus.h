@@ -267,6 +267,7 @@ typedef uint16_t joybus_identifier_t;
 void joybus_exec( const void* input, void* output );
 
 /**
+<<<<<<< HEAD
  * @brief Execute a Joybus command synchronously on the given port.
  * 
  * For convenience, there is a #joybus_exec_cmd_struct macro that uses the
@@ -277,12 +278,16 @@ void joybus_exec( const void* input, void* output );
  * a command to multiple ports simultaneously, use #joybus_exec instead.
  * 
  * For reading controllers, use the @ref joypad "Joypad Subsystem" instead.
+=======
+ * @brief Write a 64-byte block of data to the PIF and read the 64-byte result.
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
  * 
  * This function is not a stable feature of the libdragon API and should be
  * considered experimental!
  * 
  * The usage of this function will likely change as a result of the ongoing
  * effort to integrate the multitasking kernel with asynchronous operations.
+<<<<<<< HEAD
  * 
  * @note This function is slow: it blocks until the command completes.
  *       Calling this function multiple times per frame may cause
@@ -362,6 +367,16 @@ inline void joybus_exec_cmd(
         (void *)&cmd.send,                \
         (void *)&cmd.recv                 \
     )
+=======
+ *
+ * @param[in]  input
+ *             Source buffer for the input block to send to the PIF
+ *
+ * @param[out] output
+ *             Destination buffer to place the output block from the PIF
+ */
+void joybus_exec( const void* input, void* output );
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 #ifdef __cplusplus
 }

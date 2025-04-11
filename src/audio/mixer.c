@@ -158,7 +158,10 @@ static struct {
 	float vol;
 	float max_samples;
 	bool throttled;
+<<<<<<< HEAD
 	uint32_t uuid_counter;
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 	int64_t ticks;
 	int num_events;
@@ -325,7 +328,11 @@ static void waveform_read(void *ctx, samplebuffer_t *sbuf, int wpos, int wlen, b
 		int len2 = wlen-len1;
 
 		if (len1 > 0)
+<<<<<<< HEAD
 			wave->read(ctx, sbuf, wpos, len1, seeking);
+=======
+			wave->read(wave->ctx, sbuf, wpos, len1, seeking);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 		if (len2 > 0) {
 			void *dest = samplebuffer_append(sbuf, len2);
 			memset(dest, 0, len2 << SAMPLES_BPS_SHIFT(sbuf));
@@ -377,17 +384,24 @@ static void waveform_read(void *ctx, samplebuffer_t *sbuf, int wpos, int wlen, b
 	}
 }
 
+<<<<<<< HEAD
 static void mixer_ch_play_internal(int ch, waveform_t *wave, void *ctx, bool channel_specific_context)
 {
+=======
+void mixer_ch_play(int ch, waveform_t *wave) {
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 	assert(ch < Mixer.num_channels);
 	samplebuffer_t *sbuf = &Mixer.ch_buf[ch];
 	mixer_channel_t *c = &Mixer.channels[ch];
 	assertf(!(c->flags & CH_FLAGS_STEREO_SUB), "mixer_ch_play: cannot call on secondary stereo channel %d", ch);
 
+<<<<<<< HEAD
 	// Initialize uuid for this waveform if it wasn't already
 	if (wave->__uuid == 0) 
 		wave->__uuid = ++Mixer.uuid_counter;
 
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 	// If we're going to play a stereo waveform on a channel that was allocated
 	// for mono, we need to reallocate the buffer.
 	if (wave->channels == 2 && !(c->flags & CH_FLAGS_STEREO_ALLOC))
@@ -495,6 +509,7 @@ void mixer_ch_stop(int ch) {
 	if (c->flags & CH_FLAGS_STEREO)
 		c[1].flags &= ~CH_FLAGS_STEREO_SUB;
 
+<<<<<<< HEAD
 	if (c->wave && c->wave->stop)
 		c->wave->stop(c->ctx, sbuf);
 	c->ptr = 0;
@@ -507,6 +522,23 @@ void mixer_ch_stop(int ch) {
 	// samplebuffer contents.
 	c->wave = NULL;
 	c->ctx = NULL;
+=======
+	// Restart caching if played again. We need this guarantee
+	// because after calling stop(), the caller must be able
+	// to free waveform, and thus this pointer might become invalid.
+	Mixer.ch_buf[ch].wv_ctx = NULL;
+}
+
+void __mixer_wave_stopall(waveform_t *wave)
+{
+	for (int i=0; i<Mixer.num_channels; i++)
+	{
+		mixer_channel_t *c = &Mixer.channels[i];
+		samplebuffer_t *sbuf = &Mixer.ch_buf[i];
+		if (c->ptr && sbuf->wv_ctx == wave)
+			mixer_ch_stop(i);
+	}
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 }
 
 bool mixer_ch_playing(int ch) {

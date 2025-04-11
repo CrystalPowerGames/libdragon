@@ -59,11 +59,16 @@ command_exists () {
 
 # Download the file URL using wget or curl (depending on which is installed)
 download () {
+<<<<<<< HEAD
     local url="$1"
     local file="$DOWNLOAD_PATH/$(basename "$url")"
     local tmpfile="$file.part"
     if   command_exists wget ; then wget --continue --output-document "$tmpfile" "$url"
     elif command_exists curl ; then curl --location --output "$tmpfile" "$url"
+=======
+    if   command_exists wget ; then (cd "$DOWNLOAD_PATH" && wget -c  "$1")
+    elif command_exists curl ; then (cd "$DOWNLOAD_PATH" && curl -LO "$1")
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
     else
         echo "Install wget or curl to download toolchain sources" 1>&2
         return 1

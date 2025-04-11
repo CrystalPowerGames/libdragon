@@ -31,12 +31,21 @@ N64_CFLAGS += -G0 # gp is not initialized (don't use it)
 N64_CFLAGS += -mabi=32 -mgp32 -mfp32 -msingle-float # Can't compile for 64bit ABI because DMEM/IMEM don't support 64-bit access
 #N64_CFLAGS += -flto
 
+<<<<<<< HEAD
 N64_ASFLAGS = -mtune=vr4300 -march=vr4300
 N64_ASFLAGS += -mabi=32 -mgp32 -mfp32 -msingle-float -G0
 N64_RSPASFLAGS = -march=mips1 -mabi=32 -Wa,--fatal-warnings
 N64_LDFLAGS = -Wl,-T$(IPL3_LDSCRIPT) -Wl,-Map=build/ipl3.map -Wl,--gc-sections
 
 OBJS = build/ipl3.o build/minidragon.o build/rdram.o build/ique_trampoline.o build/entropy.o build/cleanup.o
+=======
+N64_ASFLAGS = -mtune=vr4300 -march=vr4300 -Wa,--fatal-warnings
+N64_ASFLAGS =  -mabi=32 -mgp32 -mfp32 -msingle-float -G0
+N64_RSPASFLAGS = -march=mips1 -mabi=32 -Wa,--fatal-warnings
+N64_LDFLAGS = -Wl,-T$(IPL3_LDSCRIPT) -Wl,-Map=build/ipl3.map -Wl,--gc-sections
+
+OBJS = build/ipl3.o build/minidragon.o build/rdram.o build/ique_trampoline.o build/entropy.o
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 ifeq ($(PROD),1)
 OBJS += build/loader.o 

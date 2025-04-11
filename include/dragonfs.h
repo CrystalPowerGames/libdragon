@@ -154,6 +154,48 @@ extern "C" {
  * @return DFS_ESUCCESS on success or a negative error otherwise.
  */
 int dfs_init(uint32_t base_fs_loc);
+<<<<<<< HEAD
+=======
+
+/**
+ * @brief Change directories to the specified path.  
+ *
+ * Supports absolute and relative 
+ *
+ * @param[in] path
+ *            Relative or absolute path to change directories to
+ * 
+ * @return DFS_ESUCCESS on success or a negative value on error.
+ */
+int dfs_chdir(const char * const path);
+
+/**
+ * @brief Find the first file or directory in a directory listing.
+ *
+ * Supports absolute and relative.  If the path is invalid, returns a negative DFS_errno.  If
+ * a file or directory is found, returns the flags of the entry and copies the name into buf.
+ *
+ * @param[in]  path
+ *             The path to look for files in
+ * @param[out] buf
+ *             Buffer to place the name of the file or directory found
+ *
+ * @return The flags (#FLAGS_FILE, #FLAGS_DIR, #FLAGS_EOF) or a negative value on error.
+ */
+int dfs_dir_findfirst(const char * const path, char *buf);
+
+/**
+ * @brief Find the next file or directory in a directory listing. 
+ *
+ * @note Should be called after doing a #dfs_dir_findfirst.
+ *
+ * @param[out] buf
+ *             Buffer to place the name of the next file or directory found
+ *
+ * @return The flags (#FLAGS_FILE, #FLAGS_DIR, #FLAGS_EOF) or a negative value on error.
+ */
+int dfs_dir_findnext(char *buf);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 
 /**
@@ -261,11 +303,15 @@ int dfs_size(uint32_t handle);
  * @return A pointer to the physical address of the file body, or 0
  *         if the file was not found.
  * 
+<<<<<<< HEAD
  * @see #dfs_rom_size
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
  */
 uint32_t dfs_rom_addr(const char *path);
 
 /**
+<<<<<<< HEAD
  * @brief Return the size of a file (in ROM data)
  * 
  * Returns the size of a file without opening it. Can be used in conjunction
@@ -282,6 +328,8 @@ uint32_t dfs_rom_addr(const char *path);
 int dfs_rom_size(const char *path);
 
 /**
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
  * @brief Convert DFS error code into an error string
  */
 const char *dfs_strerror(int error);

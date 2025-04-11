@@ -7,7 +7,10 @@
 #define __LIBDRAGON_DIR_H
 
 #include <stdint.h>
+<<<<<<< HEAD
 #include <stdbool.h>
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,8 +66,12 @@ typedef struct
  * @param[out] dir
  *             Directory entry structure to populate with first entry
  *
+<<<<<<< HEAD
  * @return 0 on successful lookup, -1 if the directory existed and is empty,
  *         or a different negative value on error (in which case, errno will be set).
+=======
+ * @return 0 on successful lookup or a negative value on error.
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
  */
 int dir_findfirst( const char * const path, dir_t *dir );
 
@@ -80,8 +87,12 @@ int dir_findfirst( const char * const path, dir_t *dir );
  * @param[out] dir
  *             Directory entry structure to populate with next entry
  *
+<<<<<<< HEAD
  * @return 0 on successful lookup, -1 if there are no more files in the directory,
  *         or a different negative value on error (in which case, errno will be set).
+=======
+ * @return 0 on successful lookup or a negative value on error.
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
  */
 int dir_findnext( const char * const path, dir_t *dir );
 

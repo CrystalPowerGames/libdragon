@@ -41,7 +41,10 @@ SECTIONS {
         KEEP(build/loader.o(.data .data.*))
         . = ALIGN(8);
         __stage2_end = .;
+<<<<<<< HEAD
         KEEP(build/cleanup.o(.text .text.* .data .rodata .rodata.*))
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
         build/debug.o      (.text .text.* .data)
         *(.rodata)
         *(.rodata.*)

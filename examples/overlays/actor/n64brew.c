@@ -36,11 +36,19 @@ static void do_crash()
     debugf((char *)0x1);
 }
 
+<<<<<<< HEAD
 static bool update(actor_t *actor, joypad_buttons_t pressed_keys)
 {
     n64brew_actor_t *this = (n64brew_actor_t *)actor;
     do_rotation(this);
     if(pressed_keys.c_right) {
+=======
+static bool update(actor_t *actor, struct controller_data pressed_keys)
+{
+    n64brew_actor_t *this = (n64brew_actor_t *)actor;
+    do_rotation(this);
+    if(pressed_keys.c[0].C_right) {
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
         do_crash();
     }
     //Despawn after existing for too long
@@ -48,7 +56,11 @@ static bool update(actor_t *actor, joypad_buttons_t pressed_keys)
         return false;
     }
     //Fast forward to flickering when pressing C-up
+<<<<<<< HEAD
     if(pressed_keys.c_up) {
+=======
+    if(pressed_keys.c[0].C_up) {
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
         this->num_ticks = SPAWN_DURATION-FLICKER_DURATION;
     }
     if(this->num_ticks > SPAWN_DURATION-FLICKER_DURATION) {

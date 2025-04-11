@@ -41,12 +41,20 @@ static bool do_vanish(triangle_actor_t *this)
     return true;
 }
 
+<<<<<<< HEAD
 static bool update(actor_t *actor, joypad_buttons_t pressed_keys)
+=======
+static bool update(actor_t *actor, struct controller_data pressed_keys)
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 {
     triangle_actor_t *this = (triangle_actor_t *)actor;
     do_animation(this);
     //Activate vanish when pressing Z
+<<<<<<< HEAD
     if(pressed_keys.z) {
+=======
+    if(pressed_keys.c[0].Z) {
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
         this->vanish = true;
     }
     return do_vanish(this);

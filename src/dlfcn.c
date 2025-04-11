@@ -539,7 +539,11 @@ static void end_module(dl_module_t *module)
     //Deregister exception frames for this module
     dso_sym_t *eh_frame_begin = search_module_exports(module, "__EH_FRAME_BEGIN__");
     if(eh_frame_begin) {
+<<<<<<< HEAD
         __deregister_frame_info((void *)eh_frame_begin->value);
+=======
+        __register_frame_info((void *)eh_frame_begin->value, module->ehframe_obj);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
     }
 }
 

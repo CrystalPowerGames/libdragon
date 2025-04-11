@@ -12,7 +12,11 @@
 #include "wav64.h"
 
 /** @brief Initialize opus decompression on a wav64 file */
+<<<<<<< HEAD
 void wav64_opus_init(wav64_t *wav, int state_size);
+=======
+void wav64_opus_init(wav64_t *wav);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 /** @brief Shut down opus decompression on a wav64 file */
 void wav64_opus_close(wav64_t *wav);

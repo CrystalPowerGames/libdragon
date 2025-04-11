@@ -65,9 +65,12 @@ size_t __strlcpy(char * restrict dst, const char * restrict src, size_t dstsize)
 #define TITLE_OFFSET 0x20
 #define TITLE_SIZE   20
 
+<<<<<<< HEAD
 #define CATEGORY_OFFSET 0x3B
 #define REGION_OFFSET 0x3E
 
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 #define IQUE_ENTRYPOINT_OFFSET 0x8
 
 #define STATUS_OK       0
@@ -118,8 +121,11 @@ int print_usage(const char * prog_name)
 	fprintf(stderr, "\t-l, --size <size>      Force ROM output file size to <size> (min 1 mebibyte).\n");
 	fprintf(stderr, "\t-h, --header <file>    Use <file> as IPL3 header (default: use libdragon IPL3).\n");
 	fprintf(stderr, "\t-o, --output <file>    Save output ROM to <file>.\n");
+<<<<<<< HEAD
 	fprintf(stderr, "\t-C, --category <cat>   N64 Media Category Code (default: 'N' - N64 Game Pak).\n");
 	fprintf(stderr, "\t-R, --region <reg>     Specify ROM region (default: 'E' - North America).\n");
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 	fprintf(stderr, "\t-T, --toc              Create a table of contents in the ROM.\n");
 	fprintf(stderr, "\n");
 	fprintf(stderr, "File flags (to be used before each file):\n");
@@ -335,6 +341,7 @@ int main(int argc, char *argv[])
 	size_t toc_offset = 0;
 	int header_size = 0;
 	int align_next = 0;
+<<<<<<< HEAD
 
 	char category = 'N';
 	// Some flashcarts (at least Everdrive X7) seem to automatically set the TV type based on the region field.
@@ -342,6 +349,8 @@ int main(int argc, char *argv[])
 	// support either PAL or NTSC. If the field is 0, the flashcart seems to not overwrite the console's region,
 	// so we use it as default.
 	char region = 0;
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 
 	if(argc <= 1)
@@ -747,6 +756,7 @@ int main(int argc, char *argv[])
 	fseek(write_file, TITLE_OFFSET, SEEK_SET);
 	fwrite(title, 1, TITLE_SIZE, write_file);
 
+<<<<<<< HEAD
 	/* Set category in header */
 	fseek(write_file, CATEGORY_OFFSET, SEEK_SET);
 	fwrite(&category, 1, 1, write_file);
@@ -755,6 +765,8 @@ int main(int argc, char *argv[])
 	fseek(write_file, REGION_OFFSET, SEEK_SET);
 	fwrite(&region, 1, 1, write_file);
 
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 	/* If we are using libdragon's IPL3, set the entrypoint in the header
 	   for iQue to match the first valid loadpoint found in the ELF. This make
 	   sure that the iQue OS, in its initial flat-binary loading, will use

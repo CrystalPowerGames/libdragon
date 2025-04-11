@@ -1288,6 +1288,57 @@ makeMxc2Op mfc2, 0x0
         .else
             .error "Invalid quantity in vsll8"
         .endif
+<<<<<<< HEAD
+=======
+    .endm
+
+    .macro vsrl vdstreg, vsrcreg, qty
+        .if (\qty == 1)
+            vmudl \vdstreg, \vsrcreg, \vshiftreg, e(0)
+        .elseif (\qty == 2)
+            vmudl \vdstreg, \vsrcreg, \vshiftreg, e(1)
+        .elseif (\qty == 3)
+            vmudl \vdstreg, \vsrcreg, \vshiftreg, e(2)
+        .elseif (\qty == 4)
+            vmudl \vdstreg, \vsrcreg, \vshiftreg, e(3)
+        .elseif (\qty == 5)
+            vmudl \vdstreg, \vsrcreg, \vshiftreg, e(4)
+        .elseif (\qty == 6)
+            vmudl \vdstreg, \vsrcreg, \vshiftreg, e(5)
+        .elseif (\qty == 7)
+            vmudl \vdstreg, \vsrcreg, \vshiftreg, e(6)
+        .elseif (\qty == 8)
+            vmudl \vdstreg, \vsrcreg, \vshiftreg, e(7)
+        .elseif (\qty >= 9 && \qty <= 15)
+            .error "Use vsrl8 for quantities in range 9-15"
+        .else
+            .error "Invalid quantity in vsrl"
+        .endif
+    .endm
+
+    .macro vsra vdstreg, vsrcreg, qty
+        .if (\qty == 1)
+            vmudm \vdstreg, \vsrcreg, \vshiftreg, e(0)
+        .elseif (\qty == 2)
+            vmudm \vdstreg, \vsrcreg, \vshiftreg, e(1)
+        .elseif (\qty == 3)
+            vmudm \vdstreg, \vsrcreg, \vshiftreg, e(2)
+        .elseif (\qty == 4)
+            vmudm \vdstreg, \vsrcreg, \vshiftreg, e(3)
+        .elseif (\qty == 5)
+            vmudm \vdstreg, \vsrcreg, \vshiftreg, e(4)
+        .elseif (\qty == 6)
+            vmudm \vdstreg, \vsrcreg, \vshiftreg, e(5)
+        .elseif (\qty == 7)
+            vmudm \vdstreg, \vsrcreg, \vshiftreg, e(6)
+        .elseif (\qty == 8)
+            vmudm \vdstreg, \vsrcreg, \vshiftreg, e(7)
+        .elseif (\qty >= 9 && \qty <= 15)
+            .error "Use vsra8 for quantities in range 9-15"
+        .else
+            .error "Invalid quantity in vsra"
+        .endif
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
     .endm
 
     .macro vsrl vdstreg, vsrcreg, qty

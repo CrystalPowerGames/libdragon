@@ -22,6 +22,7 @@ BGTest::~BGTest()
 
 void BGTest::UpdateZoom()
 {
+<<<<<<< HEAD
     joypad_buttons_t cont_data = joypad_get_buttons_held(JOYPAD_PORT_1);
     //Calculate next zoom (exponential)
     float new_zoom = m_zoom;
@@ -30,6 +31,16 @@ void BGTest::UpdateZoom()
         new_zoom *= ZOOM_SPEED;
     }
     if(cont_data.r) {
+=======
+    struct controller_data cont_data = get_keys_held();
+    //Calculate next zoom (exponential)
+    float new_zoom = m_zoom;
+    if(cont_data.c[0].L) {
+        //Zoom out
+        new_zoom *= ZOOM_SPEED;
+    }
+    if(cont_data.c[0].R) {
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
         //Zoom in
         new_zoom /= ZOOM_SPEED;
     }
@@ -46,10 +57,17 @@ void BGTest::UpdateZoom()
 
 void BGTest::UpdatePos()
 {
+<<<<<<< HEAD
     joypad_inputs_t cont_data = joypad_get_inputs(JOYPAD_PORT_1);
     //Move by analog stick position
     int8_t stick_x = cont_data.stick_x;
     int8_t stick_y = cont_data.stick_y;
+=======
+    struct controller_data cont_data = get_keys_pressed();
+    //Move by analog stick position
+    int8_t stick_x = cont_data.c[0].x;
+    int8_t stick_y = cont_data.c[0].y;
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
     if(abs(stick_x) >= STICK_DEADZONE) {
         m_pos_x += stick_x*MOVE_SPEED/m_zoom;
     }
@@ -60,8 +78,13 @@ void BGTest::UpdatePos()
 
 void BGTest::UpdateCenterPos()
 {
+<<<<<<< HEAD
     joypad_buttons_t cont_data = joypad_get_buttons_held(JOYPAD_PORT_1);
     if(cont_data.c_up) {
+=======
+    struct controller_data cont_data = get_keys_held();
+    if(cont_data.c[0].C_up) {
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
         //Move center position up
         m_center_pos_y -= CENTER_MOVE_SPEED;
         m_pos_y -= CENTER_MOVE_SPEED/m_zoom;
@@ -69,7 +92,11 @@ void BGTest::UpdateCenterPos()
             m_center_pos_y = CENTER_MARGIN_H;
         }
     }
+<<<<<<< HEAD
     if(cont_data.c_down) {
+=======
+    if(cont_data.c[0].C_down) {
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
         //Move center position down
         m_center_pos_y += CENTER_MOVE_SPEED;
         m_pos_y += CENTER_MOVE_SPEED/m_zoom;
@@ -77,7 +104,11 @@ void BGTest::UpdateCenterPos()
             m_center_pos_y = display_get_height()-CENTER_MARGIN_H;
         }
     }
+<<<<<<< HEAD
     if(cont_data.c_left) {
+=======
+    if(cont_data.c[0].C_left) {
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
         //Move center position left
         m_center_pos_x -= CENTER_MOVE_SPEED;
         m_pos_x -= CENTER_MOVE_SPEED/m_zoom;
@@ -85,7 +116,11 @@ void BGTest::UpdateCenterPos()
             m_center_pos_x = CENTER_MARGIN_W;
         }
     }
+<<<<<<< HEAD
     if(cont_data.c_right) {
+=======
+    if(cont_data.c[0].C_right) {
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
         //Move center position right
         m_center_pos_x += CENTER_MOVE_SPEED;
         m_pos_x += CENTER_MOVE_SPEED/m_zoom;
@@ -108,8 +143,13 @@ void BGTest::UpdateBackground()
 void BGTest::Update()
 {
     //Load next scene if start is pressed
+<<<<<<< HEAD
     joypad_buttons_t cont_data = joypad_get_buttons_pressed(JOYPAD_PORT_1);
     if(cont_data.start) {
+=======
+    struct controller_data cont_data = get_keys_down();
+    if(cont_data.c[0].start) {
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
         SceneMgr::SetNextScene("sprite_test");
         return;
     }

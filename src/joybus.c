@@ -16,7 +16,10 @@
 #include "mi.h"
 #include "kernel/kernel_internal.h"
 #include "regsinternal.h"
+<<<<<<< HEAD
 #include "kirq.h"
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 /**
  * @name SI status register bit definitions
@@ -275,5 +278,8 @@ void joybus_exec( const void * input, void * output )
         }
     }
 }
+<<<<<<< HEAD
 
 extern inline void joybus_exec_cmd(int port, size_t send_len, size_t recv_len, const void *send_data, void *recv_data);
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf

@@ -12,7 +12,11 @@
 #include "n64sys.h"
 #include "regsinternal.h"
 #include "interrupt.h"
+<<<<<<< HEAD
 #include "vi_internal.h"
+=======
+#include "vi.h"
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 #include "rsp.h"
 #include "rdp.h"
 #include "utils.h"
@@ -135,8 +139,19 @@ bool is_memory_expanded()
     return get_memory_size() >= 0x7C0000;
 }
 
+<<<<<<< HEAD
 reset_type_t sys_reset_type(void)
 {
+=======
+
+tv_type_t get_tv_type() 
+{
+    return __boot_tvtype;
+}
+
+reset_type_t sys_reset_type(void)
+{
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
     return __boot_resettype;
 }
 
@@ -249,6 +264,7 @@ __attribute__((constructor)) void __init_cop1(void)
     /* Write back updated cop1 control register */
     C1_WRITE_FCR31(fcr31);
 }
+<<<<<<< HEAD
 
 uint32_t getentropy32(void)
 {
@@ -390,3 +406,5 @@ extern inline uint64_t mem_read64(uint64_t vaddr);
 extern inline bool sys_bbplayer(void);
 extern inline tv_type_t get_tv_type(void);
 
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf

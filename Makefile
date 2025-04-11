@@ -33,8 +33,13 @@ libdragon: libdragon.a libdragonsys.a
 libdragonsys.a: $(BUILD_DIR)/system.o
 
 LIBDRAGON_OBJS += \
+<<<<<<< HEAD
              $(BUILD_DIR)/n64sys.o $(BUILD_DIR)/interrupt.o $(BUILD_DIR)/backtrace.o $(BUILD_DIR)/dir.o \
 			 $(BUILD_DIR)/math/fmath.o $(BUILD_DIR)/inthandler.o $(BUILD_DIR)/entrypoint.o  \
+=======
+			 $(BUILD_DIR)/n64sys.o $(BUILD_DIR)/interrupt.o $(BUILD_DIR)/backtrace.o \
+			 $(BUILD_DIR)/fmath.o $(BUILD_DIR)/inthandler.o $(BUILD_DIR)/entrypoint.o \
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 			 $(BUILD_DIR)/debug.o $(BUILD_DIR)/debugcpp.o $(BUILD_DIR)/usb.o $(BUILD_DIR)/libcart/cart.o $(BUILD_DIR)/fatfs/ff.o \
 			 $(BUILD_DIR)/fatfs/ffunicode.o $(BUILD_DIR)/fat.o $(BUILD_DIR)/rompak.o $(BUILD_DIR)/dragonfs.o \
 			 $(BUILD_DIR)/audio.o $(BUILD_DIR)/vi.o $(BUILD_DIR)/eia608.o $(BUILD_DIR)/display.o $(BUILD_DIR)/surface.o \
@@ -51,15 +56,24 @@ LIBDRAGON_OBJS += \
 			 $(BUILD_DIR)/inspector.o $(BUILD_DIR)/sprite.o \
 			 $(BUILD_DIR)/dma.o $(BUILD_DIR)/timer.o \
 			 $(BUILD_DIR)/exception.o $(BUILD_DIR)/do_ctors.o \
+<<<<<<< HEAD
 			 $(BUILD_DIR)/video/mpeg2.o $(BUILD_DIR)/video/yuv.o \
 			 $(BUILD_DIR)/video/profile.o $(BUILD_DIR)/video/throttle.o \
 			 $(BUILD_DIR)/video/rsp_yuv.o $(BUILD_DIR)/video/rsp_mpeg1.o \
+=======
+			 $(BUILD_DIR)/audio/mixer.o $(BUILD_DIR)/audio/samplebuffer.o \
+			 $(BUILD_DIR)/audio/rsp_mixer.o $(BUILD_DIR)/audio/wav64.o $(BUILD_DIR)/audio/wav64_vadpcm.o \
+			 $(BUILD_DIR)/audio/xm64.o $(BUILD_DIR)/audio/libxm/play.o \
+			 $(BUILD_DIR)/audio/libxm/context.o $(BUILD_DIR)/audio/libxm/load.o \
+			 $(BUILD_DIR)/audio/ym64.o $(BUILD_DIR)/audio/ay8910.o \
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 			 $(BUILD_DIR)/rspq/rspq.o $(BUILD_DIR)/rspq/rsp_queue.o \
 			 $(BUILD_DIR)/rspq/rspq_profile.o $(BUILD_DIR)/rspq/rsp_profile.o \
 			 $(BUILD_DIR)/rdpq/rdpq.o $(BUILD_DIR)/rdpq/rsp_rdpq.o \
 			 $(BUILD_DIR)/rdpq/rdpq_debug.o $(BUILD_DIR)/rdpq/rdpq_tri.o \
 			 $(BUILD_DIR)/rdpq/rdpq_rect.o $(BUILD_DIR)/rdpq/rdpq_mode.o \
 			 $(BUILD_DIR)/rdpq/rdpq_sprite.o $(BUILD_DIR)/rdpq/rdpq_tex.o \
+<<<<<<< HEAD
 			 $(BUILD_DIR)/rdpq/rdpq_attach.o $(BUILD_DIR)/rdpq/rdpq_font.o \
 			 $(BUILD_DIR)/rdpq/rdpq_text.o $(BUILD_DIR)/rdpq/rdpq_paragraph.o \
 			 $(BUILD_DIR)/surface.o $(BUILD_DIR)/GL/gl.o \
@@ -78,6 +92,11 @@ include $(SOURCE_DIR)/kernel/libdragon.mk
 include $(SOURCE_DIR)/audio/libdragon.mk
 include $(SOURCE_DIR)/bb/libdragon.mk
 include $(SOURCE_DIR)/dd/libdragon.mk
+=======
+			 $(BUILD_DIR)/rdpq/rdpq_attach.o $(BUILD_DIR)/dlfcn.o
+
+include $(SOURCE_DIR)/audio/libdragon.mk
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 libdragon.a: $(LIBDRAGON_OBJS)
 
@@ -118,6 +137,7 @@ install: install-mk libdragon
 	install -Cv -m 0644 dso.ld $(INSTALLDIR)/mips64-elf/lib/dso.ld
 	install -Cv -m 0644 rsp.ld $(INSTALLDIR)/mips64-elf/lib/rsp.ld
 	install -Cv -m 0644 libdragonsys.a $(INSTALLDIR)/mips64-elf/lib/libdragonsys.a
+	mkdir -p $(INSTALLDIR)/mips64-elf/include
 	install -Cv -m 0644 include/n64types.h $(INSTALLDIR)/mips64-elf/include/n64types.h
 	install -Cv -m 0644 include/pputils.h $(INSTALLDIR)/mips64-elf/include/pputils.h
 	install -Cv -m 0644 include/n64sys.h $(INSTALLDIR)/mips64-elf/include/n64sys.h
@@ -199,6 +219,7 @@ install: install-mk libdragon
 	install -Cv -m 0644 include/rdpq_debug.h $(INSTALLDIR)/mips64-elf/include/rdpq_debug.h
 	install -Cv -m 0644 include/rdpq_macros.h $(INSTALLDIR)/mips64-elf/include/rdpq_macros.h
 	install -Cv -m 0644 include/rdpq_constants.h $(INSTALLDIR)/mips64-elf/include/rdpq_constants.h
+	install -Cv -m 0644 include/dlfcn.h $(INSTALLDIR)/mips64-elf/include/dlfcn.h
 	install -Cv -m 0644 include/rsp_rdpq.inc $(INSTALLDIR)/mips64-elf/include/rsp_rdpq.inc
 	install -Cv -m 0644 include/rsp_rdpq_tri.inc $(INSTALLDIR)/mips64-elf/include/rsp_rdpq_tri.inc
 	install -Cv -m 0644 include/surface.h $(INSTALLDIR)/mips64-elf/include/surface.h

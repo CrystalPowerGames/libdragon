@@ -9,7 +9,10 @@
 #include "utils.h"
 #include "backtrace.h"
 #include "backtrace_internal.h"
+<<<<<<< HEAD
 #include "kernel/kernel_internal.h"
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 #include "dlfcn_internal.h"
 #include "cop0.h"
 #include "n64sys.h"
@@ -54,8 +57,11 @@ static int fpr_show_mode = 1;
 static int disasm_bt_idx = 0;
 static int disasm_max_frames = 0;
 static int disasm_offset = 0;
+<<<<<<< HEAD
 static int thread_offset = 0;
 static int num_threads = 0;
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 static int module_offset = 0;
 static bool first_backtrace = true;
 
@@ -451,6 +457,7 @@ static void inspector_page_disasm(surface_t *disp, exception_t* ex, joypad_butto
     }
 }
 
+<<<<<<< HEAD
 static void inspector_page_threads(surface_t *disp, exception_t* ex, joypad_buttons_t *key_pressed)
 {
     const int THREAD_LEN = 12;
@@ -523,6 +530,16 @@ static void inspector_page_modules(surface_t *disp, exception_t* ex, joypad_butt
         module_offset--;
     }
     if(key_pressed->d_down && module_offset+18 < __dl_num_loaded_modules) {
+=======
+static void inspector_page_modules(surface_t *disp, exception_t* ex, struct controller_data *key_pressed)
+{
+    dl_module_t *curr_module = __dl_list_head;
+    size_t module_idx = 0;
+    if(key_pressed->c[0].up && module_offset > 0) {
+        module_offset--;
+    }
+    if(key_pressed->c[0].down && module_offset+18 < __dl_num_loaded_modules) {
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
         module_offset++;
     }
     title("Loaded modules");
@@ -588,7 +605,10 @@ static void inspector(exception_t* ex, enum Mode mode) {
 		PAGE_GPR,
 		PAGE_FPR,
 		PAGE_CODE,
+<<<<<<< HEAD
         PAGE_THREADS,
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
         PAGE_MODULES
 	};
 	enum { PAGE_COUNT = PAGE_MODULES+1 };
@@ -638,9 +658,12 @@ static void inspector(exception_t* ex, enum Mode mode) {
         case PAGE_CODE:
             inspector_page_disasm(disp, ex, &key_pressed);
             break;
+<<<<<<< HEAD
         case PAGE_THREADS:
             inspector_page_threads(disp, ex, &key_pressed);
             break;
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
         case PAGE_MODULES:
             inspector_page_modules(disp, ex, &key_pressed);
             break;

@@ -319,12 +319,21 @@ ssize_t decompress_aplib_read(void *state, void *buf, size_t len)
     return decompress_aplib_partial(d, buf, len);
 }
 
+<<<<<<< HEAD
 bool decompress_aplib_full(int fd, size_t cmp_size, size_t size, void *buf, int *buf_size)
 {
     uint32_t rom_addr = 0;
     #ifdef N64
 	if (ioctl(fd, IODFS_GET_ROM_BASE, &rom_addr) >= 0) {
 		rom_addr += lseek(fd, 0, SEEK_CUR);
+=======
+void* decompress_aplib_full(const char *fn, int fd, size_t cmp_size, size_t size)
+{
+    uint32_t rom_addr = 0;
+    #ifdef N64
+	if (strncmp(fn, "rom:/", 5) == 0) {
+		rom_addr = (dfs_rom_addr(fn+5) & 0x1fffffff) + lseek(fd, 0, SEEK_CUR);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 	}
     #endif
     if(buf == NULL || *buf_size < size+8) {

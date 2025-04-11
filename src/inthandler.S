@@ -100,8 +100,13 @@ inthandler:
 	# interrupts disabled so that we don't risk triggering recursive interrupts,
 	# so disable IE as well. If the triggering code was running in a non-kernel
 	# mode, we also need to re-enter kernel mode.
+<<<<<<< HEAD
 	and t1, ~(SR_IE | SR_EXL | SR_KSU)
 	mtc0 t1, C0_SR
+=======
+	and k1, ~(SR_IE | SR_EXL | SR_KSU)
+	mtc0 k1, C0_SR
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 	# WARNING: after clearing the EXL bit, it is now possible to trigger
 	# reentrant exceptions (and not only crashing ones).

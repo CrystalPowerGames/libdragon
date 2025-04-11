@@ -14,7 +14,10 @@ extern "C" {
 #endif
 
 /// @cond
+<<<<<<< HEAD
 typedef struct wav64_state_s wav64_state_t;
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 extern void __wav64_init_compression_lvl3(void);
 /// @endcond
 
@@ -37,9 +40,17 @@ typedef struct wav64_s {
 	 */
 	waveform_t wave;
 
+<<<<<<< HEAD
 	///@cond
 	wav64_state_t *st;				 // Extra opaque data
 	///@endcond
+=======
+	/** @brief File descriptor to read WAV64 */
+	int current_fd;			 ///< File descriptor for the wav64 file
+	int base_offset;		 ///< Start of Wav64 data.
+	int format;			     ///< Internal format of the file
+	void *ext;               ///< Pointer to extended data (internal use)
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 } wav64_t;
 
 /**

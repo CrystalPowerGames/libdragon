@@ -212,10 +212,14 @@ int assert_equal_mem(TestContext *ctx, const char *file, int line, const uint8_t
 #include "test_rdpq_tex.c"
 #include "test_rdpq_attach.c"
 #include "test_rdpq_sprite.c"
+<<<<<<< HEAD
 #include "test_mpeg1.c"
 #include "test_gl.c"
 #include "test_dl.c"
 #include "test_math.c"
+=======
+#include "test_dl.c"
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 /**********************************************************************
  * MAIN
@@ -337,6 +341,7 @@ static const struct Testsuite
 	TEST_FUNC(test_rdpq_tex_upload_tlut,       0, TEST_FLAGS_NO_BENCHMARK),
 	TEST_FUNC(test_rdpq_sprite_upload,         0, TEST_FLAGS_NO_BENCHMARK),
 	TEST_FUNC(test_rdpq_sprite_lod,            0, TEST_FLAGS_NO_BENCHMARK),
+<<<<<<< HEAD
 	TEST_FUNC(test_mpeg1_idct,                 0, TEST_FLAGS_NO_BENCHMARK),
 	TEST_FUNC(test_mpeg1_block_decode,         0, TEST_FLAGS_NO_BENCHMARK),
 	TEST_FUNC(test_mpeg1_block_dequant,        0, TEST_FLAGS_NO_BENCHMARK),
@@ -347,6 +352,8 @@ static const struct Testsuite
 	TEST_FUNC(test_gl_texture_completeness,    0, TEST_FLAGS_NO_BENCHMARK),
 	TEST_FUNC(test_gl_list,					   0, TEST_FLAGS_NO_BENCHMARK),
 	TEST_FUNC(test_gl_cull,					   0, TEST_FLAGS_NO_BENCHMARK),
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 	TEST_FUNC(test_dl_syms,                   0, TEST_FLAGS_NO_BENCHMARK),
 	TEST_FUNC(test_dladdr,             0, TEST_FLAGS_NO_BENCHMARK),
 	TEST_FUNC(test_dl_relocs,             0, TEST_FLAGS_NO_BENCHMARK),
@@ -354,8 +361,11 @@ static const struct Testsuite
 	TEST_FUNC(test_dlsym_rtld_default,           0, TEST_FLAGS_NO_BENCHMARK),
 	TEST_FUNC(test_dlclose,           0, TEST_FLAGS_NO_BENCHMARK),
 	TEST_FUNC(test_dl_ctors,           0, TEST_FLAGS_NO_BENCHMARK),
+<<<<<<< HEAD
 	TEST_FUNC(test_mat4_mul_two_identities,				0, TEST_FLAGS_NO_BENCHMARK),
 	TEST_FUNC(test_mat4_mul_scale_translation,			0, TEST_FLAGS_NO_BENCHMARK),
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 };
 
 int main() {

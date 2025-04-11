@@ -2,16 +2,24 @@
 #define __LIBDRAGON_WAV64_INTERNAL_H
 
 #define WAV64_ID            "WV64"
+<<<<<<< HEAD
+=======
+#define WAV64_FILE_VERSION  2
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 #define WAV64_FORMAT_RAW    0
 #define WAV64_FORMAT_VADPCM 1
 #define WAV64_FORMAT_OPUS   3
 #define WAV64_NUM_FORMATS   4
 
+<<<<<<< HEAD
 #define WAV64_FLAG_WARN_SIMULTANEITY	 (1 << 0)
 #define WAV64_FLAG_OWNED_FD			 	 (1 << 1)
 
 typedef struct wav64_s wav64_t;
 typedef struct wav64_loadparms_s wav64_loadparms_t;
+=======
+typedef struct wav64_s wav64_t;
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 typedef struct samplebuffer_s samplebuffer_t;
 
 /** @brief Header of a WAV64 file. */
@@ -24,6 +32,7 @@ typedef struct __attribute__((packed)) {
 	int32_t freq;           ///< Default playback frequency
 	int32_t len;            ///< Length of the file (in samples)
 	int32_t loop_len;       ///< Length of the loop since file end (or 0 if no loop)
+<<<<<<< HEAD
 	uint32_t start_offset;  ///< Offset of the first sample in the file
 	uint32_t state_size;    ///< Size of per-mixer-channel state to allocate at runtime
 } wav64_header_t;
@@ -49,6 +58,33 @@ typedef struct {
 	int default_simul;
 	/** @brief Init function: parses extra header information for the specific codec */
 	void (*init)(wav64_t *wav, int state_size);
+=======
+	int32_t start_offset;   ///< Offset of the first sample in the file
+} wav64_header_t;
+
+_Static_assert(sizeof(wav64_header_t) == 24, "invalid wav64_header size");
+
+/** @brief A vector of audio samples */
+typedef struct __attribute__((aligned(8))) {
+	int16_t v[8];						///< Samples
+} wav64_vadpcm_vector_t;
+
+/** @brief Extended header for a WAV64 file with VADPCM compression. */
+typedef struct __attribute__((packed, aligned(8))) {
+	int8_t npredictors;					///< Number of predictors
+	int8_t order;						///< Order of the predictors
+	uint16_t padding;					///< padding
+	uint32_t padding1;					///< padding1
+	wav64_vadpcm_vector_t loop_state[2];///< State at the loop point
+	wav64_vadpcm_vector_t state[2];		///< Current decompression state
+	wav64_vadpcm_vector_t codebook[];	///< Codebook of the predictors
+} wav64_header_vadpcm_t;
+
+/** @brief WAV64 pluggable compression algorithm */
+typedef struct {
+	/** @brief Init function: parses extra header information for the specific codec */
+	void (*init)(wav64_t *wav);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 	/** @brief Close function: deallocates memory for codec-specific data */
 	void (*close)(wav64_t *wav);
 	/** @brief Return the compressed bitrate, mainly used for statistics */
@@ -56,6 +92,7 @@ typedef struct {
 } wav64_compression_t;
 
 /**
+<<<<<<< HEAD
  * Similar to #wav64_load, but uses a file descriptor instead of a filename.
  */
 wav64_t *wav64_loadfd(int fd, wav64_loadparms_t *parms);
@@ -68,4 +105,19 @@ wav64_t *wav64_loadfd(int fd, wav64_loadparms_t *parms);
  */
 void __wav64_channel_stopped(wav64_t *wav, int chidx);
 
+=======
+ * @brief Utility function to help implementing #WaveformRead for uncompressed (raw) samples.
+ * 
+ * This function uses a file descriptor to load samples from ROM into the sample buffer.
+ */  
+void raw_waveform_read(samplebuffer_t *sbuf, int fd, int wpos, int wlen, int bps);
+
+/**
+ * @brief Utility function to help implementing #WaveformRead for uncompressed (raw) samples.
+ * 
+ * This function uses PI DMA to load samples from ROM into the sample buffer.
+ * Note: Tempory function should be removed when XM64 moves to using FILE*.
+ */  
+void raw_waveform_read_address(samplebuffer_t *sbuf, int rom_addr, int wpos, int wlen, int bps);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 #endif

@@ -6,7 +6,10 @@
 #include <malloc.h>
 #include "mi.h"
 #include "regsinternal.h"
+<<<<<<< HEAD
 #include "kernel/kernel_internal.h"
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 #include "n64sys.h"
 #include "interrupt.h"
 #include "debug.h"
@@ -528,6 +531,7 @@ void unregister_RESET_handler( void (*callback)() )
     assertf(0, "Reset handler not found\n");
 }
 
+<<<<<<< HEAD
 void register_BB_FLASH_handler( void (*callback)() )
 {
     __register_callback(&BB_FLASH_callback,callback);
@@ -608,6 +612,8 @@ void unregister_BB_MD_handler( void (*callback)() )
     __unregister_callback(&BB_MD_callback,callback);
 }
 
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 void set_AI_interrupt(int active)
 {
     *MI_MASK = active ? MI_WMASK_SET_AI : MI_WMASK_CLR_AI;

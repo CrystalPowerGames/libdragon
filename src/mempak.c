@@ -4,6 +4,7 @@
  * @ingroup controllerpak
  */
 #include <string.h>
+<<<<<<< HEAD
 #include <unistd.h>
 #include "kernel/kernel_internal.h"
 #include "kirq.h"
@@ -11,6 +12,11 @@
 #include "joybus.h"
 #include "joybus_accessory.h"
 #include "joypad_accessory.h"
+=======
+#include "regsinternal.h"
+#include <unistd.h>
+#include "controller.h"
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 #include "mempak.h"
 
 /**

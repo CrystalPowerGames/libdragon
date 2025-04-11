@@ -247,9 +247,18 @@ void display_init( resolution_t res, bitdepth_t bit, uint32_t num_buffers, gamma
     // Minimum is at least one buffer.
     __buffers = MAX(1, MIN(NUM_BUFFERS, num_buffers));
 
+<<<<<<< HEAD
     bool serrate = res.interlaced != INTERLACE_OFF;
     /* Serrate on to stop vertical jitter */
     if(serrate) control |= VI_CTRL_SERRATE;
+=======
+
+    if( res.interlaced )
+    {
+        /* Serrate on to stop vertical jitter */
+        control |= VI_CTRL_SERRATE;
+    }
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
     /* Figure out control register based on input given */
     switch( bit )
@@ -363,6 +372,10 @@ void display_init( resolution_t res, bitdepth_t bit, uint32_t num_buffers, gamma
     {
         assertf(res.width % 2 == 0, "width must be divisible by 2 for 32-bit depth");
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
     /* Set up the display */
     __width = res.width;
     __height = res.height;
@@ -399,6 +412,7 @@ void display_init( resolution_t res, bitdepth_t bit, uint32_t num_buffers, gamma
     if ( vi_is_active() ) { vi_wait_for_vblank(); }
 
     /* Set basic preset */
+<<<<<<< HEAD
     vi_write_config(&vi_config_presets[serrate][__tv_type]);
 
     if( __tv_type == TV_PAL && res.pal60 )
@@ -434,6 +448,15 @@ void display_init( resolution_t res, bitdepth_t bit, uint32_t num_buffers, gamma
     display_set_fps_limit(0);
     kalman_init(&k_fps, 1.0f, 0.01f);
     kalman_init(&k_delta, 1.0f, 1.0f);
+=======
+    vi_write_config(&vi_config_presets[res.interlaced][tv_type]);
+
+    vi_write_safe(VI_ORIGIN, PhysicalAddr(__safe_buffer[0]));
+    vi_write_safe(VI_WIDTH, res.width);
+    vi_write_safe(VI_X_SCALE, VI_X_SCALE_SET(res.width));
+    vi_write_safe(VI_Y_SCALE, VI_Y_SCALE_SET(res.height));
+    vi_write_safe(VI_CTRL, control);
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
     enable_interrupts();
 

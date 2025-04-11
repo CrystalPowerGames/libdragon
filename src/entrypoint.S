@@ -26,10 +26,14 @@ _start:
 	/* Copy bootcode flags, stored in DMEM */
 	lui v0, 0xA400
 	lw t0, 0x0000(v0)
+<<<<<<< HEAD
 	lw t1, 0x0004(v0)
 	sw t0, %gprel(__boot_memsize)(gp)
 	sw t1, %gprel(__entropy_state+0)(gp)
 	sw t1, %gprel(__entropy_state+4)(gp)
+=======
+	sw t0, %gprel(__boot_memsize)(gp)
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 	/* Copy other bootcode flags */
 	lbu t0, 0x0009(v0)

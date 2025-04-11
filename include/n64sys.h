@@ -34,7 +34,10 @@
 
 ///@cond
 extern int __boot_consoletype;
+<<<<<<< HEAD
 extern int __boot_tvtype;
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 ///@endcond
 
 /**
@@ -484,6 +487,7 @@ int get_memory_size();
 bool is_memory_expanded();
 
 /**
+<<<<<<< HEAD
  * @brief Heap statistics
  */
 typedef struct {
@@ -497,6 +501,8 @@ typedef struct {
 void sys_get_heap_stats(heap_stats_t *stats);
 
 /**
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
  * @brief Allocate a buffer that will be accessed as uncached memory.
  * 
  * This function allocates a memory buffer that can be safely read and written
@@ -557,10 +563,14 @@ typedef enum {
  * 
  * @return enum value indicating PAL, NTSC or MPAL
  */
+<<<<<<< HEAD
 inline tv_type_t get_tv_type(void)
 {
     return (tv_type_t)__boot_tvtype;
 }
+=======
+tv_type_t get_tv_type();
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 /** @brief Reset types */
 typedef enum {
@@ -578,6 +588,7 @@ typedef enum {
  * on a warm boot.
  */
 reset_type_t sys_reset_type(void);
+<<<<<<< HEAD
 
 /**
  * @brief Return 32-bit of entropy.
@@ -674,6 +685,8 @@ inline uint64_t mem_read64(uint64_t vaddr) {
 }
 
 /** @} */
+=======
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
 
 /** @cond */
 
@@ -689,6 +702,15 @@ __attribute__((deprecated("use get_ticks instead")))
 static inline volatile unsigned long read_count(void) {
     return get_ticks();
 }
+
+/* Deprecated functions to tell libdragon which CIC is installed.
+   This was only used to cope with differences in boot flags with
+   official IPL3s, but it's not required anymore with open source
+   IPL3. */
+__attribute__((deprecated("querying CIC type is not supported")))
+static inline int sys_get_boot_cic() { return 6102; }
+__attribute__((deprecated("cannot set CIC type at runtime, but this is not required anymore")))
+static inline void sys_set_boot_cic(int bc) {}
 /** @endcond */
 
 #ifdef __cplusplus

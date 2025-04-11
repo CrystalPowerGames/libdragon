@@ -180,6 +180,7 @@ int shr_unpack(uint8_t *dst, uint8_t *src)
     return dst - dst_start;
 }
 
+<<<<<<< HEAD
 bool decompress_shrinkler_full(int fd, size_t cmp_size, size_t size, void *buf, int *buf_size)
 {
     void *in = malloc(cmp_size);
@@ -189,6 +190,16 @@ bool decompress_shrinkler_full(int fd, size_t cmp_size, size_t size, void *buf, 
         return false;
     }
     int dec_size = shr_unpack(buf, in); (void)dec_size;
+=======
+void* decompress_shrinkler_full(const char *fn, int fd, size_t cmp_size, size_t size)
+{
+    void *in = malloc(cmp_size);
+    read(fd, in, cmp_size);
+
+    void *out = malloc(size);
+    if (!out) return 0;
+    int dec_size = shr_unpack(out, in); (void)dec_size;
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
     assertf(dec_size == size, "Shrinkler size:%d exp:%d", dec_size, size);
     free(in);
     return true;

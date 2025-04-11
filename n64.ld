@@ -111,6 +111,7 @@ SECTIONS {
         *(.gnu.linkonce.d.*)
         . = ALIGN(8);
     }
+<<<<<<< HEAD
     
     .tdata : {
         __tls_base = .;
@@ -134,6 +135,9 @@ SECTIONS {
     /* Fix dot for TBSS Sections */
     . = .+(__tbss_end-__tbss_start);
     
+=======
+        
+>>>>>>> 24926336e643b93c6390d7ec57b62e1f5044e9cf
     /* Small data START */
 
     .sdata : {
