@@ -2,6 +2,7 @@
  * @file joypad_internal.h
  * @author Christopher Bonhage (me@christopherbonhage.com)
  * @brief Joypad internal
+<<<<<<< HEAD
  * @ingroup joypad
  */
 
@@ -9,17 +10,33 @@
 #define __LIBDRAGON_JOYPAD_INTERNAL_H
 
 #include <assert.h>
+=======
+ * @ingroup joypad 
+ */
+
+#ifndef __JOYPAD_INTERNAL_H
+#define __JOYPAD_INTERNAL_H
+
+>>>>>>> 0f9be152e42aa160e217045b801f22cf11fdd5f7
 #include <stddef.h>
 #include <stdint.h>
 
 #include "joypad_accessory.h"
+<<<<<<< HEAD
 #include "utils.h"
+=======
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+>>>>>>> 0f9be152e42aa160e217045b801f22cf11fdd5f7
 
 /**
  * @addtogroup joypad
  * @{
  */
 
+<<<<<<< HEAD
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -106,10 +123,54 @@ typedef struct joypad_device_hot_s
 } joypad_device_hot_t;
 
 extern volatile joybus_identifier_t joypad_identifiers_hot[JOYPAD_PORT_COUNT];
+=======
+typedef enum
+{
+    JOYPAD_RUMBLE_METHOD_NONE = 0,
+    JOYPAD_RUMBLE_METHOD_N64_RUMBLE_PAK,
+    JOYPAD_RUMBLE_METHOD_GCN_CONTROLLER,
+} joypad_rumble_method_t;
+
+typedef struct joypad_gcn_origin_s
+{
+    uint8_t stick_x;
+    uint8_t stick_y;
+    uint8_t cstick_x;
+    uint8_t cstick_y;
+    uint8_t analog_l;
+    uint8_t analog_r;
+} joypad_gcn_origin_t;
+
+#define JOYPAD_GCN_ORIGIN_INIT \
+    ((joypad_gcn_origin_t){ 127, 127, 127, 127, 0, 0 })
+
+typedef union joypad_buttons_raw_u
+{
+    uint16_t value;
+    joypad_buttons_t buttons;
+} joypad_buttons_raw_t;
+
+typedef struct joypad_device_cold_s
+{
+    joypad_style_t style;
+    joypad_inputs_t current;
+    joypad_inputs_t previous;
+} joypad_device_cold_t;
+
+typedef struct joypad_device_hot_s
+{
+    joypad_style_t style;
+    joypad_rumble_method_t rumble_method;
+    bool rumble_active;
+} joypad_device_hot_t;
+
+extern volatile joypad_identifier_t joypad_identifiers_hot[JOYPAD_PORT_COUNT];
+>>>>>>> 0f9be152e42aa160e217045b801f22cf11fdd5f7
 extern volatile joypad_device_hot_t joypad_devices_hot[JOYPAD_PORT_COUNT];
 extern volatile joypad_gcn_origin_t joypad_origins_hot[JOYPAD_PORT_COUNT];
 extern volatile joypad_accessory_t  joypad_accessories_hot[JOYPAD_PORT_COUNT];
 
+<<<<<<< HEAD
 /**
  * @brief Read the inputs from a Nintendo 64 controller synchronously.
  * 
@@ -142,6 +203,8 @@ int joypad_get_accessory_state(joypad_port_t port);
  */
 int joypad_get_accessory_error(joypad_port_t port);
 
+=======
+>>>>>>> 0f9be152e42aa160e217045b801f22cf11fdd5f7
 #ifdef __cplusplus
 }
 #endif
